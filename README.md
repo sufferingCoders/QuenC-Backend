@@ -11,7 +11,7 @@
 |完成|作物|優先級|描述|耕種人|完成時間|
 |:---:|:---:|:---:|:---:|:---:|:---:|
 |<ul><li>- [x] </li></ul>|Flutter <-> Golang 對接測試|Must Have| 測試WebSocket 和 Flutter的對接 | Richard | 18 Dec 2019 |
-|<ul><li>- [] </li></ul>|Golang <-> MongoDB 對接測試|Must Have| 測試Subscription 和 MongoDB的對接 | Richard | |
+|<ul><li>- [ ] </li></ul>|Golang <-> MongoDB 對接測試|Must Have| 測試Subscription 和 MongoDB的對接 | Richard | |
 
 
 
