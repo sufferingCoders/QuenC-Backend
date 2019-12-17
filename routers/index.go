@@ -23,6 +23,8 @@ func InitRouter() *gin.Engine {
 
 	router.GET("/ws", func(c *gin.Context) {
 
+		println("Get in the websocket service")
+
 		// Upgrade writer and Reader
 		ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 
@@ -38,6 +40,9 @@ func InitRouter() *gin.Engine {
 
 		for {
 			mt, message, err := ws.ReadMessage()
+
+			log.Printf("Get message %+v", string(message))
+
 			if err != nil {
 				log.Printf("Error occur: %+v\b", err)
 				break
