@@ -18,7 +18,45 @@
 # Golang 資源
 
 ### 依賴處理
-[Go Module](https://openhome.cc/Gossip/Go/Module.html)
-[Go Websocket](https://zhuanlan.zhihu.com/p/35167916)
+[[Go Module]](https://openhome.cc/Gossip/Go/Module.html)
+[[Go Websocket]](https://zhuanlan.zhihu.com/p/35167916)
 
+# WebSocket
+在後端我們使用WebSocket來實現實時通信, 主要用來傳送任何有關User的更改.
 
+我們使用的主要Package是 [Gorilla WebSocket](https://github.com/gorilla/websocket)
+
+使用上我們將WebSocket放進 [Gin](https://github.com/gin-gonic/gin) 的框架中
+
+我們設置一個GET節點後, 將此節點升級為WebSocket
+
+```go
+ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+```
+
+之後我們再用Loop去管理接收到的訊息, 因為是雙向通道, 所以伺服器端也能主動傳送訊息
+
+```go
+
+		for {
+			mt, message, err := ws.ReadMessage()
+
+			log.Printf("Get message %+v", string(message))
+
+			if err != nil {
+				log.Printf("Error occur: %+v\b", err)
+				break
+			}
+
+			if string(message) == "ping" {
+				message = []byte("pong")
+			}
+
+			err = ws.WriteMessage(mt, message)
+
+			if err != nil {
+				break
+			}
+		}
+    
+```
