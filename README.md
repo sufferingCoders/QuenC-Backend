@@ -66,3 +66,31 @@ ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 		}
     
 ```
+
+
+# Flutter <-> Golang <-> MongoDB 對接
+
+## 為什麼需要這組對接?
+我們要用這組對接來取代**FireStore**, 將多數的業務邏輯轉移到後端, 同時我們需要後端能提供一個Stream來告訴前端, "Database 中的資料改變了, 改變後的結果是 xxx", 這樣的實時通訊我們會用來使用在User的Schema和聊天室的功能上, Post和Comment則會繼續使用一般的Http Request。
+
+## 什麼是Stream?
+Stream可以看成是一個通道, 而我們這個使用狀況下的Stream, 則是我們追蹤(Watch/Subscribe)的資料在**MongoDB**中有被Updated的時候, 才會將改變的細節丟入通道中, 前端即可接收到這筆資料, 並重新建置Flutter的Widget。這篇[StreamBuilder的介紹](https://www.youtube.com/watch?v=MkKEWHfy99Y)和[Stream的介紹](https://youtu.be/nQBpOIHE4eE)也簡短的解釋了在Flutter中怎麼使用Stream。
+
+在做State Management的時候, 也有一個叫做 **Rx** 系列的方法, [RxDart](https://pub.dev/packages/rxdart)中的 Observable 和 StreamController 都提供很多語法糖讓你輕鬆地應對Stream, 但是在我們的專案中Provider已經可以升任大部分的工作所以我們沒有採用這個比較重型的RxDart
+
+## 對接
+
+### Retrieve & Update
+
+首先我們需要兩個 RESTful API 的基本操作, Retreive 和 Update 所以我們看一下這兩個操作要怎麼在和端和前端執行
+
+#### 先創立一個Test Schema在後端
+
+```go
+type Testing struct {
+	ID    primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Email string             `json:"email" bson:"email"`
+}
+```
+
+
