@@ -11,9 +11,11 @@
 |完成|作物|優先級|描述|耕種人|完成時間|
 |:---:|:---:|:---:|:---:|:---:|:---:|
 |<ul><li>- [x] </li></ul>|Flutter <-> Golang 對接測試|Must Have| 測試WebSocket 和 Flutter的對接 | Richard | 18 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|Insert|Must Have| 測試注入Data至MongoDB | Richard |  |
-|<ul><li>- [] </li></ul>|Update|Must Have| 測試Update MongoDB Document| Richard |  |
-|<ul><li>- [ ] </li></ul>|Listen to Change Stream|Must Have| 測試MongoDB ChangeStream | Richard | |
+|<ul><li>- [x] </li></ul>|Insert|Must Have| 測試注入Data至MongoDB | Richard | 20 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Update|Must Have| 測試Update MongoDB Document| Richard | 20 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Listen to Change Stream|Must Have| 測試MongoDB ChangeStream | Richard | 20 Dec 2019 |
+|<ul><li>- [ ] </li></ul>|遷移User|Must Have| 建造User | Richard | |
+
 
 
 
