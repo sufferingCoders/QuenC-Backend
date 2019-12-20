@@ -86,7 +86,7 @@ Stream 可以看成是一個通道, 而我們這個使用狀況下的 Stream, �
 
 #### 先創立一個 Test Schema 在後端 (使用 Schema 我們定義資料剛怎麼存儲在 MongoDB )
 
-它長的這樣, 有兩個Fields, 一個ID是當我們將資料加入MongoDB中時會自動生成的, 另外一個則是我們可以自由決定的"Email"。Golang中的struct可以看待成傳統Java或C#這種OOP中的Class, 但它又沒有一些Class擁有的功能(ex: Inheritance)。
+它長的這樣, 有兩個 Fields, 一個 ID 是當我們將資料加入 MongoDB 中時會自動生成的, 另外一個則是我們可以自由決定的 "Email" 。Golang 中的 struct 可以看待成傳統 Java 或 C# 這種 OOP 中的 Class, 但它又沒有一些 Class 擁有的功能 (ex: Inheritance)。
 
 ```go
 type Testing struct {
@@ -95,9 +95,9 @@ type Testing struct {
 }
 ```
 
-#### 在後端創立兩個Handlers (Creating & Updating)
+#### 在後端創立兩個 Handlers ( Creating & Updating )
 
-我們使用[Gin](https://github.com/gin-gonic/gin)框架, 來創造一個POST和一個PUT Handler.
+我們使用 [Gin](https://github.com/gin-gonic/gin) 框架, 來創造一個 POST 和一個 PUT Handler.
 
 
 ```go
@@ -194,7 +194,7 @@ router.PUT("/test/:id", func(c *gin.Context) {
 ```
 
 
-#### 在前端中加入一個Provider來傳輸數據到後端
+#### 在前端中加入一個 Provider 來傳輸數據到後端
 
 
 ```dart
@@ -331,7 +331,82 @@ class WebScoketService with ChangeNotifier {
             },
           ),
 ```
-我們用這幾個UI來創建和更新後端的Test Document
+我們用這幾個 UI 來創建和更新後端的 Test Document
+
+
+### 數據監控
+
+#### 後端 
+
+後端要提供一個 GET 接口, 這個接口可以被 Upgrade 成 Websocket 接手。當這個 WebSocket 接口開啟時, 隨即監聽 MongoDB 中的 **ChangeStream**。
+
+[Change Stream](https://docs.mongodb.com/manual/changeStreams/)
+[Change Events](https://docs.mongodb.com/manual/reference/change-events/)
+
+```go
+router.GET("/test/subscribe/:id", func(c *gin.Context) {
+
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil) // 將此 GET REQUEST 升級成 WebSocket
+
+	defer ws.Close()
+
+	if err != nil {
+		errStr := fmt.Sprintf("The websocket is not working due to the error: %+v \n", err)	
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errStr,
+		})
+		return
+	}
+
+	id := c.Param("id") // 取出要監聽的Document ID
+
+	oid, err := primitive.ObjectIDFromHex(id) 
+
+	if err != nil {
+		errStr := fmt.Sprintf("The given id cannot be transform to oid: %+v \n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
+	pipeline := mongo.Pipeline{bson.D{{"$match", bson.D{{"fullDocument._id", oid}}}}} // 選擇監聽Output的條件
+
+	collectionStream, err := database.DB.Collection("test").Watch(context.TODO(), pipeline, 
+		options.ChangeStream().SetFullDocument(options.UpdateLookup)) // 拿到監聽的 Stream
+
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot get the stream: %+v \n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errStr,
+		})
+		return
+	}
+
+	defer collectionStream.Close(context.TODO())
+
+	for {   // 開始監聽MongoDB特定ID的Document是否有被Changed
+		ok := collectionStream.Next(context.TODO()) // 若有新的Change Event
+		if ok {
+			next := collectionStream.Current // 取出現在的Change Event
+
+			log.Printf("Next: %+v", next)
+				
+			// 使用WebSocket 將Change Event 的資料傳送至前端
+			err = ws.WriteMessage(websocket.TextMessage, []byte(next.String())) 
+
+			if err != nil {
+				break
+			}
+		}
+	}
+})
+
+```
+
+
+
 
 
 
