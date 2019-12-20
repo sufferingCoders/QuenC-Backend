@@ -47,11 +47,8 @@ var ( // Changing to env variables
 func AddUser(inputUser *User) (interface{}, error) {
 
 	result, err := userCollection.InsertOne(context.TODO(), inputUser)
-	if err != nil {
-		return nil, err
-	}
 
-	return result.InsertedID, nil
+	return result.InsertedID, err
 }
 
 // UpdateUsers - Update User in MongoDB
