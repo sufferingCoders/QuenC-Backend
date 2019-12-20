@@ -84,7 +84,9 @@ Stream可以看成是一個通道, 而我們這個使用狀況下的Stream, 則�
 
 首先我們需要兩個 RESTful API 的基本操作, Retreive 和 Update 所以我們看一下這兩個操作要怎麼在和端和前端執行
 
-#### 先創立一個Test Schema在後端
+#### 先創立一個Test Schema在後端 (使用Schema我們定義資料剛怎麼存儲在MongoDB)
+
+它長的這樣, 有兩個Fields, 一個ID是當我們將資料加入MongoDB中時會自動生成的, 另外一個則是我們可以自由決定的"Email"。Golang中的struct可以看待成傳統Java或C#這種OOP中的Class, 但它又沒有一些Class擁有的功能(ex: Inheritance)。
 
 ```go
 type Testing struct {
@@ -92,5 +94,34 @@ type Testing struct {
 	Email string             `json:"email" bson:"email"`
 }
 ```
+
+#### 從前端蒐集客戶數據
+
+
+```dart
+  Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: TextField(
+      decoration: InputDecoration(
+	hintText: "Email",
+	hintStyle: TextStyle(
+	  fontSize: 16,
+	),
+      ),
+      controller: emailController,
+    ),
+  ),
+  FlatButton(
+    child: Text("Create"),
+    onPressed: () async {
+      print("Create Pressed");
+    },
+  ),
+```
+
+首先我們要用這兩個Widget來請客戶來輸入Email, 按下FlatButton後再將此Email傳送到後端讓將此Email加入MongoDB中,
+
+
+
 
 
