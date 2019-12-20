@@ -2,6 +2,7 @@ package routers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"quenc/database"
@@ -45,8 +46,9 @@ func InitRouter() *gin.Engine {
 		err := c.ShouldBindJSON(&testAdding)
 
 		if err != nil {
+			errStr := fmt.Sprintf("Cannot bind the given info : %+v \n", err)
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"err": err,
+				"err": errStr,
 				"msg": "Cannot bind the given info",
 			})
 			return
@@ -59,9 +61,9 @@ func InitRouter() *gin.Engine {
 		result, err := database.DB.Collection("test").InsertOne(context.TODO(), testingClient)
 
 		if err != nil {
-			log.Printf("cannot insert a test due to the error : %+v \n", err)
+			errStr := fmt.Sprintf("Can't insert a test due to the error : %+v \n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
+				"error": errStr,
 			})
 			return
 		}
@@ -80,9 +82,10 @@ func InitRouter() *gin.Engine {
 		oid, err := primitive.ObjectIDFromHex(id)
 
 		if err != nil {
+			errStr := fmt.Sprintf("The given id cannot be transform to oid : %+v \n", err)
+
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"err": err,
-				"msg": "The given id cannot be transform to oid",
+				"err": errStr,
 			})
 			return
 		}
@@ -91,17 +94,10 @@ func InitRouter() *gin.Engine {
 		err = c.ShouldBindJSON(&testInfo)
 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"err": err,
-				"msg": "Cannot bind the given info",
-			})
-			return
-		}
+			errStr := fmt.Sprintf("Cannot bind the given info: %+v \n", err)
 
-		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"err": err,
-				"msg": "Cannot bind the given info with Products",
+				"err": errStr,
 			})
 			return
 		}
@@ -113,15 +109,16 @@ func InitRouter() *gin.Engine {
 		)
 
 		if err != nil {
-			log.Printf("cannot update a test due to the error : %+v \n", err)
+			errStr := fmt.Sprintf("Cannot update a test due to the error: %+v \n", err)
+
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
+				"error": errStr,
 			})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"UpsertedID": result.UpsertedID,
+			"result": result,
 		})
 
 	})
@@ -129,16 +126,14 @@ func InitRouter() *gin.Engine {
 	// This for creating the WebSocket and listen to the change stream in the MongoDB
 	router.GET("/test/subscribe/:id", func(c *gin.Context) {
 
-		// add the user first
-		println("IN sub")
 		ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 
 		defer ws.Close()
 
 		if err != nil {
-			log.Printf("The websocket is not working due to the error : %+v \n", err)
+			errStr := fmt.Sprintf("The websocket is not working due to the error: %+v \n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
+				"error": errStr,
 			})
 			return
 		}
@@ -148,9 +143,9 @@ func InitRouter() *gin.Engine {
 		oid, err := primitive.ObjectIDFromHex(id)
 
 		if err != nil {
+			errStr := fmt.Sprintf("The given id cannot be transform to oid: %+v \n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"err": err,
-				"msg": "The given id cannot be transform to oid",
+				"err": errStr,
 			})
 			return
 		}
@@ -160,9 +155,9 @@ func InitRouter() *gin.Engine {
 		collectionStream, err := database.DB.Collection("test").Watch(context.TODO(), pipeline, options.ChangeStream().SetFullDocument(options.UpdateLookup))
 
 		if err != nil {
-			log.Printf("The collection stream is not working due to the error : %+v \n", err)
+			errStr := fmt.Sprintf("Cannot get the stream: %+v \n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
+				"error": errStr,
 			})
 			return
 		}
@@ -182,11 +177,6 @@ func InitRouter() *gin.Engine {
 					break
 				}
 			}
-
-			// log.Printf("The collection stream cannot perform next")
-			// c.JSON(http.StatusInternalServerError, gin.H{
-			// 	"error": "The collection stream cannot perform next",
-			// })
 		}
 	})
 
