@@ -2,9 +2,12 @@ package utils
 
 import (
 	"net/http"
+	"os"
+	"quenc/models"
 	"strconv"
 	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -66,4 +69,41 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) {
 
 		findOptions.SetSort(sortMap)
 	}
+}
+
+// GenerateAuthToken - Generate the Auth token for given id
+func GenerateAuthToken(id string) (interface{}, error) {
+	/*
+		Method for generating the token
+	*/
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"_id": id,
+		// "exp":   time.Now().Add(time.Hour * 2).Unix(),
+	})
+
+	authToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return authToken, nil
+}
+
+// GetUserFromContext - Return User Object
+func GetUserFromContext(c *gin.Context) *models.User {
+	var user *models.User
+	userStr, ok := c.Get("user")
+
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err": "Cannot retrieve the user after token authorization",
+			"msg": "Cannot retrieve the user after token authorization",
+		})
+		return nil
+	} else {
+		user = userStr.(*models.User)
+	}
+
+	return user
 }

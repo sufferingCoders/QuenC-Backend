@@ -1,4 +1,4 @@
-package moels
+package models
 
 import (
 	"context"
@@ -11,15 +11,15 @@ import (
 )
 
 type Comment struct {
-	ID            primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	BelongPost primitive.ObjectID `json:"belongPost" bson:"belongPost"`
-	Author        string             `json:"author" bson:"author"`
-	AuthorDomain  string             `json:"authorDomain" bson:"authorDomain"`
-	Content       string             `json:"content" bson:"content"`
-	AuthorGender  int                `json:"authorGender" bson:"authorGender"`
-	LikeCount     int                `json:"likeCount" bson:"likeCount"`
-	UpdatedAt     primitive.DateTime `json:"updatedAt" bson:"updatedAt"`
-	CreatedAt     primitive.DateTime `json:"createdAt" bson:"createdAt"`
+	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	BelongPost   primitive.ObjectID `json:"belongPost" bson:"belongPost"`
+	Author       string             `json:"author" bson:"author"`
+	AuthorDomain string             `json:"authorDomain" bson:"authorDomain"`
+	Content      string             `json:"content" bson:"content"`
+	AuthorGender int                `json:"authorGender" bson:"authorGender"`
+	LikeCount    int                `json:"likeCount" bson:"likeCount"`
+	UpdatedAt    primitive.DateTime `json:"updatedAt" bson:"updatedAt"`
+	CreatedAt    primitive.DateTime `json:"createdAt" bson:"createdAt"`
 }
 
 var (
