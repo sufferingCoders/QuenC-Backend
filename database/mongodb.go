@@ -16,6 +16,7 @@ var DB *mongo.Database
 // InitDB - Initialise the database for MongoDB
 func InitDB() {
 	// Setting autoload in the main funciton to get the environment variables
+	// fmt.Printf("uri is %+v \n", os.Getenv("MGDB_APIKEY"))
 	clientOptions := options.Client().ApplyURI(os.Getenv("MGDB_APIKEY"))
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 
