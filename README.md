@@ -432,6 +432,7 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 ![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/windows_ip.jpg?raw=true)
 
 ## MacOS
+偏好設定 > Network > Advanced > TCP/IP 中就有
 
 撰寫中...
 
