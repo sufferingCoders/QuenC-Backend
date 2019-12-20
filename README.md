@@ -82,7 +82,7 @@ Stream可以看成是一個通道, 而我們這個使用狀況下的Stream, 則�
 
 ### Retrieve & Update
 
-首先我們需要兩個 RESTful API 的基本操作, Retreive 和 Update 所以我們看一下這兩個操作要怎麼在和端和前端執行
+首先我們需要兩個 RESTful API 的基本操作, Retreive 和 Update 所以我們看一下這兩個操作要怎麼在和端和前端執行。
 
 #### 先創立一個Test Schema在後端 (使用Schema我們定義資料剛怎麼存儲在MongoDB)
 
@@ -95,33 +95,248 @@ type Testing struct {
 }
 ```
 
-#### 從前端蒐集客戶數據
+#### 在後端創立兩個Handlers (Creating & Updating)
+
+我們使用[Gin](https://github.com/gin-gonic/gin)框架, 來創造一個POST和一個PUT Handler.
+
+
+```go
+
+type TestInfo struct {
+	Email string `json:"email" bson:"email"`
+}
+
+// Create Handler 用來接受前端傳來的資料後在MongoDB中加入這筆資料
+router.POST("/test", func(c *gin.Context) {
+
+	var testAdding TestInfo
+	err := c.ShouldBindJSON(&testAdding) // 預期前端的ContentTypeHeader使用的是application/json
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot bind the given info : %+v \n", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"err": errStr,
+			"msg": "Cannot bind the given info",
+		})
+		return
+	}
+
+	testingClient := Testing{
+		Email: testAdding.Email,
+	}
+
+	result, err := database.DB.Collection("test").InsertOne(context.TODO(), testingClient)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Can't insert a test due to the error : %+v \n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errStr,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id": result.InsertedID,
+	})
+
+})
+
+
+// Update Handler 用來更新MongoDB已有的數據
+router.PUT("/test/:id", func(c *gin.Context) {
+
+	id := c.Param("id")
+
+	oid, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		errStr := fmt.Sprintf("The given id cannot be transform to oid : %+v \n", err)
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
+	var testInfo TestInfo
+	err = c.ShouldBindJSON(&testInfo)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot bind the given info: %+v \n", err)
+
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
+	result, err := database.DB.Collection("test").UpdateOne(
+		context.TODO(),
+		bson.M{"_id": oid},
+		bson.M{"$set": bson.M{"email": testInfo.Email}},
+	)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot update a test due to the error: %+v \n", err)
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errStr,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"result": result,
+	})
+
+})
+
+```
+
+
+#### 在前端中加入一個Provider來傳輸數據到後端
 
 
 ```dart
-  Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: TextField(
-      decoration: InputDecoration(
-	hintText: "Email",
-	hintStyle: TextStyle(
-	  fontSize: 16,
-	),
+
+class WebScoketService with ChangeNotifier {
+
+  static IOWebSocketChannel channel;
+  static String insertedID;
+  
+  IOWebSocketChannel get currentChannel {
+    return channel;
+  }
+
+  String get currentId {
+    return insertedID;
+  }
+  
+  
+  /// 加入數據至後端
+  Future<void> addTestDocument(String email) async {
+    if (email == null || email.isEmpty) {
+      return null;
+    }
+    final String url = "http://192.168.1.135:8080/test"; // 如果要在實機上測試則用Wifi下的IP, 下面會介紹怎麼取得
+    
+    final res = await http.post(
+      url,
+      headers: {
+        HttpHeaders.contentTypeHeader: "application/json",
+      },
+      body: json.encode(
+        {
+          "email": email,
+        },
       ),
-      controller: emailController,
-    ),
-  ),
-  FlatButton(
-    child: Text("Create"),
-    onPressed: () async {
-      print("Create Pressed");
-    },
-  ),
+    );
+
+    if (res.body == null || res.body.isEmpty) {
+      return;
+    }
+
+    final resData = json.decode(res.body);
+    
+   	//  若在後端沒有錯誤的話, 我們在此處拿到的res.body, 應該就會對應 Create Handler的:
+	//	c.JSON(http.StatusOK, gin.H{
+	//		"id": result.InsertedID,
+	//	})
+
+    return resData["id"];
+  }
+  
+  
+  
+  /// 更新在後端的數據
+  Future<dynamic> updateTestDocument(String id, String email) async {
+    if (id == null || id.isEmpty) {
+      if (insertedID == null) {
+        return null;
+      } else {
+        id = insertedID;
+      }
+    }
+
+    final String url = "http://192.168.1.135:8080/test/$id";
+    final res = await http.put(
+      url,
+      headers: {
+        HttpHeaders.contentTypeHeader: "application/json",
+      },
+      body: json.encode(
+        {
+          "email": email,
+        },
+      ),
+    );
+
+    if (res.body == null || res.body.isEmpty) {
+      return;
+    }
+
+    final resData = json.decode(res.body);
+    
+    return resData;
+  }
+  
+
 ```
 
-首先我們要用這兩個Widget來請客戶來輸入Email, 按下FlatButton後再將此Email傳送到後端讓將此Email加入MongoDB中,
+#### 收集數據的UI
+
+```dart
+	// 用來輸入創建或是更新的Email
+ 	 Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Email",
+                hintStyle: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              controller: emailController,
+            ),
+          ),
+	  // 用來輸入需要跟新的Document Id
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField( 
+              decoration: InputDecoration(
+                hintText: "ID",
+                hintStyle: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              controller: idController,
+            ),
+          ),
+	  // 按下即請求後端增加一個Test Document
+          FlatButton(
+            child: Text("Create"),
+            onPressed: () async {
+              print("Create Pressed");
+              await Provider.of<WebScoketService>(context, listen: false)
+                  .addTestDocument(emailController.text);
+            },
+          ),
+	  // 按下即請求後端Update特定的Test Docuemnt
+          FlatButton(
+            child: Text("Update"),
+            onPressed: () {
+              print("update Pressed");
+              Provider.of<WebScoketService>(context, listen: false)
+                  .updateTestDocument(idController.text, emailController.text);
+            },
+          ),
+```
+我們用這幾個UI來創建和更新後端的T
 
 
+
+# 如何取得你的Ip
+撰寫中...
 
 
 
