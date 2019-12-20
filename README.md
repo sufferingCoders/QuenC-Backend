@@ -8,7 +8,7 @@
 - [Golang資源](#Golang-資源)
 	- [依賴處理](#依賴處理)
 - [WebSocket](#WebSocket)
-- [Flutter <-> Golang <-> MongoDB 對接](#Flutter-<->-Golang-<->-MongoDB-對接)
+- [Flutter & Golang & MongoDB 對接](#Flutter-&-Golang-&-MongoDB-對接)
 
 
 # 待討論
@@ -77,7 +77,7 @@ ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 ```
 
 
-# Flutter <-> Golang <-> MongoDB 對接
+# Flutter & Golang & MongoDB 對接
 
 ## 為什麼需要這組對接?
 我們要用這組對接來取代 **FireStore** , 將多數的業務邏輯轉移到後端, 同時我們需要後端能提供一個 Stream 來告訴前端, " Database 中的資料改變了, 改變後的結果是 xxx ", 這樣的實時通訊我們會用來使用在 User 的 Schema 和聊天室的功能上, Post 和 Comment 則會繼續使用一般的 Http Request。
