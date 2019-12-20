@@ -427,6 +427,9 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 # 如何取得你的IP
 當我們需要用實體機來測試時, 我們可以透過Wifi實現前後端的對連, 此時我們要將封包由前端發向後端, 則需要Wifi下區網內的IP.
 
+## Windows
+
+
 撰寫中...
 
 
