@@ -8,7 +8,7 @@
 - [Golang資源](#Golang-資源)
 	- [依賴處理](#依賴處理)
 - [WebSocket](#WebSocket)
-- [Flutter <-> Golang <-> MongoDB 對接](#Flutter <-> Golang <-> MongoDB 對接)
+- [Flutter <-> Golang <-> MongoDB 對接](#Flutter-<->-Golang-<->-MongoDB-對接)
 
 
 # 待討論
