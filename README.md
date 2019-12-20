@@ -428,7 +428,10 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 當我們需要用實體機來測試時, 我們可以透過Wifi實現前後端的對連, 此時我們要將封包由前端發向後端, 則需要Wifi下區網內的IP.
 
 ## Windows
+再Command Prompt中輸入 `ipconfig`, 紅框內則為所需的IP Address
+![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/windows_ip.jpg?raw=true)
 
+## MacOS
 
 撰寫中...
 
