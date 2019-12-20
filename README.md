@@ -432,11 +432,11 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 
 ## Windows
 再Command Prompt中輸入 `ipconfig`, 紅框內則為所需的IP Address
-![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/windows_ip.jpg?raw=true)
+![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/github_images/windows_ip.jpg?raw=true)
 
 ## MacOS
 偏好設定 > Network > Advanced > TCP/IP 中就有
-![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/MacOS_IP.png?raw=true)
+![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/github_images/MacOS_IP.png?raw=true)
 
 
 
