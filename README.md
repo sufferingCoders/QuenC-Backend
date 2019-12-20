@@ -2,6 +2,13 @@
 
 目前QuenC前端是使用Firestore來存取資料, 但Firestore有許多的限制, 希望能用 Golang + MongoDB 來取代 Firestore.
 
+
+- [待討論](#待討論)
+- [待實現](#待實現)
+- [Golang資源](#Golang資源)
+- [Golang資源](#Golang資源)
+	-[依賴處理](#依賴處理)
+
 # 待討論
 - [ ] 該使用WebSocket的Schema
 
