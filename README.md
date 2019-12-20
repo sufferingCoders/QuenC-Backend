@@ -5,8 +5,11 @@
 
 - [待討論](#待討論)
 - [待實現](#待實現)
-- [Golang資源](#Golang資源)
+- [Golang資源](#Golang-資源)
 	- [依賴處理](#依賴處理)
+- [WebSocket](#WebSocket)
+- [Flutter <-> Golang <-> MongoDB 對接](#Flutter<->Golang<->MongoDB對接)
+
 
 # 待討論
 - [ ] 該使用WebSocket的Schema
