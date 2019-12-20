@@ -4,7 +4,9 @@ import (
 	"context"
 	"quenc/database"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Post -Post Schema
@@ -37,4 +39,12 @@ func AddPost(inputPost *Post) (interface{}, error) {
 	}
 
 	return result.InsertedID, nil
+}
+
+// UpdatePosts - Update User in MongoDB
+func UpdatePosts(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult, error) {
+
+	result, err := postCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
+
+	return result, err
 }
