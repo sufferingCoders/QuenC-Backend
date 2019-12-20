@@ -15,6 +15,9 @@
 		- [Retrieve and Update](#Retrieve-and-Update)
 		- [數據監控](#數據監控)
 - [如何取得你的IP](#如何取得你的IP)
+	- [Windows](#Windows)
+	- [MacOS](#MacOS)
+	
 	
 
 
@@ -433,8 +436,7 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 
 ## MacOS
 偏好設定 > Network > Advanced > TCP/IP 中就有
-
-撰寫中...
+![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/MacOS_IP.png?raw=true)
 
 
 
