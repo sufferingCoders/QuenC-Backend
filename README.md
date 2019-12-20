@@ -15,6 +15,9 @@
 		- [Retrieve and Update](#Retrieve-and-Update)
 		- [數據監控](#數據監控)
 - [如何取得你的IP](#如何取得你的IP)
+	- [Windows](#Windows)
+	- [MacOS](#MacOS)
+	
 	
 
 
@@ -30,7 +33,7 @@
 |<ul><li>- [x] </li></ul>|Insert|Must Have| 測試注入Data至MongoDB | Richard | 20 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Update|Must Have| 測試Update MongoDB Document| Richard | 20 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Listen to Change Stream|Must Have| 測試MongoDB ChangeStream | Richard | 20 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|寫MongoDB對接方法 在ReadMe|Must Have| 描述MongoDB對接 | Richard | |
+|<ul><li>- [x] </li></ul>|寫MongoDB對接方法 在ReadMe|Must Have| 描述MongoDB對接 | Richard | 20 Dec 2019 |
 |<ul><li>- [ ] </li></ul>|遷移User|Must Have| 建造User | Richard | |
 
 
@@ -428,9 +431,12 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 當我們需要用實體機來測試時, 我們可以透過Wifi實現前後端的對連, 此時我們要將封包由前端發向後端, 則需要Wifi下區網內的IP.
 
 ## Windows
+再Command Prompt中輸入 `ipconfig`, 紅框內則為所需的IP Address
+![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/windows_ip.jpg?raw=true)
 
-
-撰寫中...
+## MacOS
+偏好設定 > Network > Advanced > TCP/IP 中就有
+![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/MacOS_IP.png?raw=true)
 
 
 
