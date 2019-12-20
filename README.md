@@ -13,7 +13,8 @@
 	- [什麼是Stream?](#什麼是Stream)
 	- [對接](#對接)
 		- [Retrieve and Update](#Retrieve-and-Update)
-		- [先創立一個 Test Schema 在後端](#先創立一個 Test Schema 在後端 (使用 Schema 我們定義資料剛怎麼存儲在 MongoDB ))
+		- [數據監控](#數據監控)
+- [如何取得你的IP](如何取得你的IP)
 	
 
 
@@ -423,9 +424,9 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 
 
 
+# 如何取得你的IP
+當我們需要用實體機來測試時, 我們可以透過Wifi實現前後端的對連, 此時我們要將封包由前端發向後端, 則需要Wifi下區網內的IP.
 
-
-# 如何取得你的Ip
 撰寫中...
 
 
