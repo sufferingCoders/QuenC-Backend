@@ -10,6 +10,11 @@
 - [WebSocket](#WebSocket)
 - [Flutter Golang MongoDB 對接](#Flutter-Golang-MongoDB-對接)
 	- [為什麼需要這組對接?](#為什麼需要這組對接)
+	- [什麼是Stream?](#什麼是Stream)
+	- [對接](#對接)
+		- [Retrieve and Update](#Retrieve-and-Update)
+		- [先創立一個 Test Schema 在後端](#先創立一個-Test-Schema-在後端)
+	
 
 
 # 待討論
@@ -90,7 +95,7 @@ Stream 可以看成是一個通道, 而我們這個使用狀況下的 Stream, �
 
 ## 對接
 
-### Retrieve & Update
+### Retrieve and Update
 
 首先我們需要兩個 RESTful API 的基本操作, Retreive 和 Update 所以我們看一下這兩個操作要怎麼在和端和前端執行。
 
