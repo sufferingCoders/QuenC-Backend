@@ -14,7 +14,7 @@
 	- [對接](#對接)
 		- [Retrieve and Update](#Retrieve-and-Update)
 		- [數據監控](#數據監控)
-- [如何取得你的IP](如何取得你的IP)
+- [如何取得你的IP](#如何取得你的IP)
 	
 
 
