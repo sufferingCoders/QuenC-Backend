@@ -154,7 +154,7 @@ func FindAllPostCategorys(c *gin.Context) {
 	})
 }
 
-func FindPostCategoryByOID(c *gin.Context) {
+func FindPostCategoryByID(c *gin.Context) {
 	cid := c.Param("cid")
 	cOID := utils.GetOID(cid, c)
 	if cOID == nil {

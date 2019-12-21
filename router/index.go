@@ -220,6 +220,12 @@ func InitRouter() *gin.Engine {
 			}
 		}
 	})
+	InitUserRouter(router)
+	InitReportRouter(router)
+	InitPostCategoryRouter(router)
+	InitPostRouter(router)
+	InitCommentRouter(router)
+
 
 	return router
 }

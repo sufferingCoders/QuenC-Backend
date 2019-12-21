@@ -1,7 +1,6 @@
 package apis
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"quenc/models"
@@ -94,20 +93,10 @@ func DeleteComment(c *gin.Context) {
 			"cid": cid,
 		})
 	}
-	user := utils.GetUserFromContext(c)
-	if user == nil {
-		return
-	}
 
 	// Only Admin and Author Can delete the Comment
 
-	if user.Role == 0 {
-		err = models.DeleteCommentByOID(pOID)
-	} else {
-		_, err = models.CommentCollection.DeleteOne(context.TODO(),
-			bson.M{"_id": pOID, "author": user.ID},
-		)
-	}
+	err = models.DeleteCommentByOID(pOID)
 
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot transfrom the given id to ObjectId: %+v", err)
@@ -143,7 +132,7 @@ func FindAllComment(c *gin.Context) {
 	})
 }
 
-func FindCommentByPost(c *gin.Context) {
+func FindCommentsByPost(c *gin.Context) {
 	pid := c.Param("pid")
 
 	pOID := utils.GetOID(pid, c)

@@ -19,33 +19,6 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) error {
 
 	skip, limit, sort := c.Query("skip"), c.Query("limit"), c.Query("sort")
 
-	// findOptions := options.Find()
-	if strings.TrimSpace(skip) != "" {
-		inputSkip, err := strconv.ParseInt(skip, 10, 64)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"err":  err,
-				"msg":  "Cannot setup skip",
-				"skip": skip,
-			})
-			return err
-		}
-		findOptions.SetSkip(inputSkip)
-	}
-
-	if strings.TrimSpace(limit) != "" {
-		inputLimit, err := strconv.ParseInt(limit, 10, 64)
-		if err != nil {
-			c.AbortW(http.StatusBadRequest, gin.H{
-				"err":   err,
-				"msg":   "Cannot setup limit",
-				"limit": limit,
-			})
-			return err
-		}
-		findOptions.SetLimit(inputLimit)
-	}
-
 	sortMap := map[string]int{}
 	if strings.TrimSpace(sort) != "" {
 		if s := strings.Split(sort, "_"); len(s) == 2 {
@@ -70,6 +43,33 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) error {
 		}
 
 		findOptions.SetSort(sortMap)
+	}
+
+	// findOptions := options.Find()
+	if strings.TrimSpace(skip) != "" {
+		inputSkip, err := strconv.ParseInt(skip, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"err":  err,
+				"msg":  "Cannot setup skip",
+				"skip": skip,
+			})
+			return err
+		}
+		findOptions.SetSkip(inputSkip)
+	}
+
+	if strings.TrimSpace(limit) != "" {
+		inputLimit, err := strconv.ParseInt(limit, 10, 64)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err":   err,
+				"msg":   "Cannot setup limit",
+				"limit": limit,
+			})
+			return err
+		}
+		findOptions.SetLimit(inputLimit)
 	}
 
 	return nil
