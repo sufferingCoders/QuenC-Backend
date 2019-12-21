@@ -1,15 +1,19 @@
 package apis
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"quenc/models"
 	"quenc/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
+
 )
 
 type SingupInfo struct {
@@ -294,4 +298,64 @@ func UpdateUser(c *gin.Context) {
 		},
 	)
 
+}
+
+func SubscribeUser(c *gin.Context) {
+
+	var upGrader = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+
+	defer ws.Close()
+
+	if err != nil {
+		errStr := fmt.Sprintf("The websocket is not working due to the error: %+v \n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errStr,
+		})
+		return
+	}
+
+	user := utils.GetUserFromContext(c)
+
+	if user == nil {
+		return
+	}
+
+	stream, err := models.WatchUserByOID(user.ID)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot get the stream: %+v \n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errStr,
+		})
+		return
+	}
+
+	defer stream.Close(context.TODO())
+
+	for {
+		ok := stream.Next(context.TODO())
+		if ok {
+			next := stream.Current
+
+			var m map[string]interface{}
+
+			err := bson.Unmarshal(next, &m)
+			if err != nil {
+				log.Print(err)
+				break
+			}
+
+			err = ws.WriteJSON(m["fullDocument"].(map[string]interface{}))
+			if err != nil {
+				log.Print(err)
+				break
+			}
+		}
+	}
 }

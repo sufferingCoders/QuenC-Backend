@@ -150,7 +150,7 @@ func SendingVerificationEmail(user *User) error {
 // CheckingTheAuth - Checking if email and password are valid
 func CheckingTheAuth(email string, password string) (*User, error) {
 	var user User
-	err := database.DB.Collection("user").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+	err := database.UserCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 
@@ -159,3 +159,17 @@ func CheckingTheAuth(email string, password string) (*User, error) {
 	}
 	return &user, nil
 }
+
+func WatchUser(pipeline *mongo.Pipeline, changeStreamOption *options.ChangeStreamOptions) (*mongo.ChangeStream, error) {
+	collectionStream, err := database.UserCollection.Watch(context.TODO(), pipeline, changeStreamOption)
+	return collectionStream, err
+}
+
+func WatchUserByOID(oid primitive.ObjectID) (*mongo.ChangeStream, error) {
+	pipeline := mongo.Pipeline{bson.D{{"$match", bson.D{{"fullDocument._id", oid}}}}}
+	changeStreamOption := options.ChangeStream().SetFullDocument(options.UpdateLookup)
+	stream, err := WatchUser(&pipeline, changeStreamOption)
+	return stream, err
+}
+
+

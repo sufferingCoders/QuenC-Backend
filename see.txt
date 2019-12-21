@@ -1,0 +1,24 @@
+map[
+    _id:map[
+        _data:825DFE0A96000000012B022C0100296E5A10048267B4F52E524884B1484169F46115B246645F696400645DFE0A77FDAB4CD07E59B33A0004
+        ] 
+    clusterTime:{T:1576929942 I:1}
+    documentKey:map[
+        _id:ObjectID("5dfe0a77fdab4cd07e59b33a")
+        ] 
+    fullDocument:map[
+        _id:ObjectID("5dfe0a77fdab4cd07e59b33a")
+        email:dgdfvd
+        ] 
+    ns:map[
+        coll:test
+        db:quenc
+        ] 
+    operationType:update 
+    updateDescription:map[
+        removedFields:[]
+        updatedFields:map[
+            email:dgdfvd
+            ]
+            ]
+            ]
