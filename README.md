@@ -63,7 +63,7 @@
 [[Go Websocket]](https://zhuanlan.zhihu.com/p/35167916)
 
 # WebSocket
-在後端我們使用WebSocket來實現實時通信, 主要用來傳送任何有關User的更改.
+在後端我們使用 WebSocket 來實現實時通信, 主要用來傳送任何有關User的更改.
 
 我們使用的主要Package是 [Gorilla WebSocket](https://github.com/gorilla/websocket)
 
