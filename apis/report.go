@@ -7,8 +7,10 @@ import (
 	"quenc/utils"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // 若回傳nil 直接Return
@@ -86,4 +88,47 @@ func UpdateReport(c *gin.Context) {
 	})
 }
 
-// Delete Post
+func DeleteReport(c *gin.Context) {
+	var err error
+	rid := c.Param("rid")
+	rOID := utils.GetOID(rid, c)
+	if rOID == nil {
+		return
+	}
+
+	// Only Admin and Author Can delete the Report
+
+	err = models.DeleteReportByOID(*rOID)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot transfrom the given id to ObjectId: %+v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+			"pid": rid,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"pid": rid,
+	})
+}
+
+func FindAllReports(c *gin.Context) {
+	findOption := options.Find()
+	err := utils.SetupFindOptions(findOption, c)
+	if err != nil {
+		return
+	}
+	reports, err := models.FindReports(bson.M{}, findOption)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot find the reports: %+v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"reports": reports,
+	})
+}

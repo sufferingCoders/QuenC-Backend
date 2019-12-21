@@ -267,6 +267,7 @@ func UpdateUser(c *gin.Context) {
 	if user == nil {
 		return
 	}
+	// Admin should be able to do
 
 	UpsertedID, err := models.UpdateUserByOID(user.ID, updateUserInfo.UpdateDetail)
 
