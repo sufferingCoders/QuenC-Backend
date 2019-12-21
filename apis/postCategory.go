@@ -39,6 +39,14 @@ func AddPostCategory(c *gin.Context) {
 
 	InsertedID, err := models.AddPostCategory(&postCategory)
 
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot add this category: %+v", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
 	postCategory.ID = InsertedID.(primitive.ObjectID)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -51,22 +59,21 @@ func UpdatePostCategory(c *gin.Context) {
 	var updateFields map[string]interface{}
 
 	cid := c.Param("cid")
-
-	if err := c.ShouldBindJSON(&updateFields); err != nil {
+	err := c.ShouldBindJSON(&updateFields)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
 		})
 		return
 	}
-
-	if cOID := utils.GetOID(cid, c); cOID = nil {
+	cOID := utils.GetOID(cid, c)
+	if cOID == nil {
 		return
 	}
-
-
-	if user := utils.GetUserFromContext(c); user == nil {
-		return 
+	user := utils.GetUserFromContext(c)
+	if user == nil {
+		return
 	}
 
 	if !user.IsAmin() {
@@ -76,8 +83,8 @@ func UpdatePostCategory(c *gin.Context) {
 		})
 		return
 	}
-
-	if result, err := models.UpdatePostCategoryByOID(*cOID, updateFields); err != nil {
+	result, err := models.UpdatePostCategoryByOID(*cOID, updateFields)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot update the category: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -94,12 +101,13 @@ func UpdatePostCategory(c *gin.Context) {
 
 func DeletePostCategoryById(c *gin.Context) {
 	cid := c.Param("cid")
-	if cOID := utils.GetOID(cid, c); cOID == nil {
-		return 
+	cOID := utils.GetOID(cid, c)
+	if cOID == nil {
+		return
 	}
-
-	if user := utils.GetUserFromContext(c), user == nil {
-		return 
+	user := utils.GetUserFromContext(c)
+	if user == nil {
+		return
 	}
 
 	if !user.IsAmin() {
@@ -110,7 +118,8 @@ func DeletePostCategoryById(c *gin.Context) {
 		return
 	}
 
-	if err := models.DeletePostCategoryByOID(*cOID); err != nil {
+	err := models.DeletePostCategoryByOID(*cOID)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot delete the category: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -131,8 +140,8 @@ func FindAllPostCategorys(c *gin.Context) {
 	if err := utils.SetupFindOptions(findOption, c); err != nil {
 		return
 	}
-
-	if postCategories, err := models.FindAllPostCategorys(findOption); err != nil {
+	postCategories, err := models.FindAllPostCategorys(findOption)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot find the categories: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -147,13 +156,13 @@ func FindAllPostCategorys(c *gin.Context) {
 
 func FindPostCategoryByOID(c *gin.Context) {
 	cid := c.Param("cid")
-	if cOID := utils.GetOID(cid, c); cOID == nil {
-		return 
+	cOID := utils.GetOID(cid, c)
+	if cOID == nil {
+		return
 	}
 
-	
-
-	if postCategory, err := models.FindPostCategoryByOID(*cOID); err != nil {
+	postCategory, err := models.FindPostCategoryByOID(*cOID)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot find the categories: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,

@@ -17,16 +17,17 @@ import (
 func AddPost(c *gin.Context) {
 
 	var post models.Post
+	var err error
 
-	if err := c.ShouldBindJSON(&post); err != nil {
+	if err = c.ShouldBindJSON(&post); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
 		})
 		return
 	}
-
-	if InsertedID, err := models.AddPost(&post); err != nil {
+	InsertedID, err := models.AddPost(&post)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot add this post: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -58,18 +59,19 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
-	if user := utils.GetUserFromContext(c); user == nil {
+	user := utils.GetUserFromContext(c)
+	if user == nil {
 		return
 	}
 
 	// Only Admin and Author can update the post
-
-	if pOID := utils.GetOID(pid); pOID == nil {
+	pOID := utils.GetOID(pid, c)
+	if pOID == nil {
 		return
 	}
 
 	if user.Role == 0 {
-		result, err = models.UpdatePostByOID(pOID, updateFields)
+		result, err = models.UpdatePostByOID(*pOID, updateFields)
 	} else {
 		result, err = models.PostCollection.UpdateOne(context.TODO(),
 			bson.M{"_id": pOID, "author": user.ID},
@@ -97,16 +99,16 @@ func UpdatePost(c *gin.Context) {
 func DeletePost(c *gin.Context) {
 	var err error
 	pid := c.Param("pid")
-
-	if pOID, err := primitive.ObjectIDFromHex(pid); err != nil {
+	pOID, err := primitive.ObjectIDFromHex(pid)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot transfrom the given id to ObjectId: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
 			"pid": pid,
 		})
 	}
-
-	if user := utils.GetUserFromContext(c); user == nil {
+	user := utils.GetUserFromContext(c)
+	if user == nil {
 		return
 	}
 
@@ -139,10 +141,10 @@ func FindAllPost(c *gin.Context) {
 	err := utils.SetupFindOptions(findOption, c)
 
 	if err != nil {
-		return 
+		return
 	}
-
-	if posts, err := models.FindPosts(bson.M{}, findOption); err != nil {
+	posts, err := models.FindPosts(bson.M{}, findOption)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the posts: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
@@ -157,12 +159,12 @@ func FindAllPost(c *gin.Context) {
 func FindPostById(c *gin.Context) {
 
 	pid := c.Param("pid")
-
-	if pOID := utils.GetOID(pid); pOID == nil {
+	pOID := utils.GetOID(pid, c)
+	if pOID == nil {
 		return
 	}
-
-	if post, err := models.FindPostByOID(pOID); err != nil {
+	post, err := models.FindPostByOID(*pOID)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the post: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
@@ -177,18 +179,19 @@ func FindPostById(c *gin.Context) {
 func FindPostByAuthor(c *gin.Context) {
 	aid := c.Param("aid")
 
-	if aOID != utils.GetOID(aid); aOID == nil {
+	aOID := utils.GetOID(aid, c)
+	if aOID == nil {
 		return
 	}
 
 	findOption := options.Find()
 	err := utils.SetupFindOptions(findOption, c)
 	if err != nil {
-		return 
+		return
 	}
 
-
-	if posts, err := models.FindPostByAuthor(aOID, findOption); err != nil {
+	posts, err := models.FindPostByAuthor(*aOID, findOption)
+	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the post: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
