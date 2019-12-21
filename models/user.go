@@ -10,26 +10,28 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User - User Schema
 type User struct {
-	ID           primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
-	Domain       string               `json:"domain" bson:"domain"`
-	Email        string               `json:"email" bson:"email"`
-	Password     string               `json:"password" bson:"password"`
-	PhotoURL     string               `json:"photoURL" bson:"photoURL"`
-	Role         int                  `json:"role" bson:"role"`
-	Gender       int                  `json:"gender" bson:"gender"`
-	LastSeen     primitive.DateTime   `json:"lastSeen" bson:"lastSeen"`
-	Dob          primitive.DateTime   `json:"dob" bson:"dob"`
-	CreatedAt    primitive.DateTime   `json:"createdAt" bson:"createdAt"`
-	ChatRooms    []primitive.ObjectID `json:"chatRooms" bson:"chatRooms"`
-	Friends      []primitive.ObjectID `json:"friends" bson:"friends"`
-	Major        []primitive.ObjectID `json:"major" bson:"major"`
-	LikePosts    []primitive.ObjectID `json:"likePosts" bson:"likePosts"`
-	LikeComments []primitive.ObjectID `json:"likeComments" bson:"likeComments"`
-	SavedPosts   []primitive.ObjectID `json:"savedPosts" bson:"savedPosts"`
+	ID            primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
+	Domain        string               `json:"domain" bson:"domain"`
+	Email         string               `json:"email" bson:"email"`
+	Password      string               `json:"password" bson:"password"`
+	PhotoURL      string               `json:"photoURL" bson:"photoURL"`
+	Role          int                  `json:"role" bson:"role"`
+	Gender        int                  `json:"gender" bson:"gender"`
+	EmailVerified bool                 `json:"emailVerified" bson:"emailVerified"`
+	LastSeen      primitive.DateTime   `json:"lastSeen" bson:"lastSeen"`
+	Dob           primitive.DateTime   `json:"dob" bson:"dob"`
+	CreatedAt     primitive.DateTime   `json:"createdAt" bson:"createdAt"`
+	ChatRooms     []primitive.ObjectID `json:"chatRooms" bson:"chatRooms"`
+	Friends       []primitive.ObjectID `json:"friends" bson:"friends"`
+	Major         []primitive.ObjectID `json:"major" bson:"major"`
+	LikePosts     []primitive.ObjectID `json:"likePosts" bson:"likePosts"`
+	LikeComments  []primitive.ObjectID `json:"likeComments" bson:"likeComments"`
+	SavedPosts    []primitive.ObjectID `json:"savedPosts" bson:"savedPosts"`
 }
 
 var ( // Changing to env variables
@@ -42,6 +44,10 @@ var ( // Changing to env variables
 	userCollection      = database.DB.Collection("User")
 	verificationBaseURL = "https://shopping-au.appspot.com/user/activate/"
 )
+
+func (u *User) IsAmin() bool {
+	return u.Role == 0
+}
 
 // AddUser - Adding User to MongoDB
 func AddUser(inputUser *User) (interface{}, error) {
@@ -139,4 +145,17 @@ func SendingVerificationEmail(user *User) error {
 		msg,
 	)
 	return err
+}
+
+// CheckingTheAuth - Checking if email and password are valid
+func CheckingTheAuth(email string, password string) (*User, error) {
+	var user User
+	err := database.DB.Collection("user").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

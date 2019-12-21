@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"quenc/models"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -69,6 +71,20 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) {
 
 		findOptions.SetSort(sortMap)
 	}
+}
+
+func GetOID(id string, c *gin.Context) *primitive.ObjectID {
+	oid, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot transfrom the given id to ObjectId: %+v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+			"id":  id,
+		})
+		return nil
+	}
+	return &oid
 }
 
 // GenerateAuthToken - Generate the Auth token for given id

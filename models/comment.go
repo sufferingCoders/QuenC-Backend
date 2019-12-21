@@ -23,13 +23,13 @@ type Comment struct {
 }
 
 var (
-	commentCollection = database.DB.Collection("Comment")
+	CommentCollection = database.DB.Collection("Comment")
 )
 
 // AddComment - Adding Comment to MongoDB
 func AddComment(inputComment *Comment) (interface{}, error) {
 
-	result, err := commentCollection.InsertOne(context.TODO(), inputComment)
+	result, err := CommentCollection.InsertOne(context.TODO(), inputComment)
 
 	return result.InsertedID, err
 }
@@ -37,7 +37,7 @@ func AddComment(inputComment *Comment) (interface{}, error) {
 // UpdateComments - Update Comment in MongoDB
 func UpdateComments(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := commentCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
+	result, err := CommentCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
 
 	return result, err
 }
@@ -45,14 +45,14 @@ func UpdateComments(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResu
 // UpdateCommentByOID - Update Comment in MongoDB by its OID
 func UpdateCommentByOID(oid primitive.ObjectID, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := commentCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
+	result, err := CommentCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
 
 	return result, err
 }
 
 // DeleteCommentByOID - Delete Comment by its OID
 func DeleteCommentByOID(oid primitive.ObjectID) error {
-	_, err := commentCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
+	_, err := CommentCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
 	return err
 }
 
@@ -60,7 +60,7 @@ func DeleteCommentByOID(oid primitive.ObjectID) error {
 func FindCommentByOID(oid primitive.ObjectID) (*Comment, error) {
 	var comment Comment
 
-	err := commentCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&comment)
+	err := CommentCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&comment)
 
 	return &comment, err
 }
@@ -68,7 +68,7 @@ func FindCommentByOID(oid primitive.ObjectID) (*Comment, error) {
 // FindComments - Find Multiple Comments by filterDetail
 func FindComments(filterDetail bson.M, findOptions *options.FindOptions) ([]*Comment, error) {
 	var comments []*Comment
-	result, err := commentCollection.Find(context.TODO(), filterDetail, findOptions)
+	result, err := CommentCollection.Find(context.TODO(), filterDetail, findOptions)
 	defer result.Close(context.TODO())
 
 	if err != nil {
