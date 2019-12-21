@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 type PostCategory struct {
@@ -15,14 +16,10 @@ type PostCategory struct {
 	CategoryName primitive.ObjectID `json:"categoryName" bson:"categoryName"`
 }
 
-var (
-	PostCategoryCollection = database.DB.Collection("postCategory")
-)
-
 // AddPostCategory - Adding PostCategory to MongoDB
 func AddPostCategory(inputPostCategory *PostCategory) (interface{}, error) {
 
-	result, err := PostCategoryCollection.InsertOne(context.TODO(), inputPostCategory)
+	result, err := database.PostCategoryCollection.InsertOne(context.TODO(), inputPostCategory)
 
 	return result.InsertedID, err
 }
@@ -32,7 +29,7 @@ func AddPostCategory(inputPostCategory *PostCategory) (interface{}, error) {
 // UpdatePostCategorys - Update PostCategory in MongoDB
 func UpdatePostCategorys(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := PostCategoryCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
+	result, err := database.PostCategoryCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
 
 	return result, err
 }
@@ -40,14 +37,14 @@ func UpdatePostCategorys(filterDetail bson.M, updateDetail bson.M) (*mongo.Updat
 // UpdatePostCategoryByOID - Update PostCategory in MongoDB by its OID
 func UpdatePostCategoryByOID(oid primitive.ObjectID, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := PostCategoryCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
+	result, err := database.PostCategoryCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
 
 	return result, err
 }
 
 // DeletePostCategoryByOID - Delete PostCategory by its OID
 func DeletePostCategoryByOID(oid primitive.ObjectID) error {
-	_, err := PostCategoryCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
+	_, err := database.PostCategoryCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
 	return err
 }
 
@@ -55,7 +52,7 @@ func DeletePostCategoryByOID(oid primitive.ObjectID) error {
 func FindPostCategoryByOID(oid primitive.ObjectID) (*PostCategory, error) {
 	var PostCategory PostCategory
 
-	err := PostCategoryCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&PostCategory)
+	err := database.PostCategoryCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&PostCategory)
 
 	return &PostCategory, err
 }
@@ -63,7 +60,7 @@ func FindPostCategoryByOID(oid primitive.ObjectID) (*PostCategory, error) {
 // FindPostCategorys - Find Multiple PostCategorys by filterDetail
 func FindPostCategorys(filterDetail bson.M, findOptions *options.FindOptions) ([]*PostCategory, error) {
 	var postCategorys []*PostCategory
-	result, err := PostCategoryCollection.Find(context.TODO(), filterDetail, findOptions)
+	result, err := database.PostCategoryCollection.Find(context.TODO(), filterDetail, findOptions)
 	defer result.Close(context.TODO())
 
 	if err != nil {

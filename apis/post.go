@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"quenc/database"
 	"quenc/models"
 	"quenc/utils"
 
@@ -12,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 func AddPost(c *gin.Context) {
@@ -73,7 +75,7 @@ func UpdatePost(c *gin.Context) {
 	if user.Role == 0 {
 		result, err = models.UpdatePostByOID(*pOID, updateFields)
 	} else {
-		result, err = models.PostCollection.UpdateOne(context.TODO(),
+		result, err = database.PostCollection.UpdateOne(context.TODO(),
 			bson.M{"_id": pOID, "author": user.ID},
 			bson.M{"$set": updateFields},
 		)
@@ -117,7 +119,7 @@ func DeletePost(c *gin.Context) {
 	if user.Role == 0 {
 		err = models.DeletePostByOID(pOID)
 	} else {
-		_, err = models.PostCollection.DeleteOne(context.TODO(),
+		_, err = database.PostCollection.DeleteOne(context.TODO(),
 			bson.M{"_id": pOID, "author": user.ID},
 		)
 	}

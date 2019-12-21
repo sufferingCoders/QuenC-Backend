@@ -1,15 +1,17 @@
 package main
 
 import (
+	"quenc/database"
+	"quenc/router"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
-	"quenc/database"
-	"quenc/routers"
+
 )
 
 func main() {
 	gin.ForceConsoleColor()
 	database.InitDB()
-	r := routers.InitRouter()
+	r := router.InitRouter()
 	r.Run()
 }

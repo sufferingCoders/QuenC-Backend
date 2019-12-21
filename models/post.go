@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 // Post -Post Schema
@@ -27,14 +28,10 @@ type Post struct {
 	Category     string             `json:"category" bson:"category"`
 }
 
-var (
-	PostCollection = database.DB.Collection("Post")
-)
-
 // AddPost - Adding Post to MongoDB
 func AddPost(inputPost *Post) (interface{}, error) {
 
-	result, err := PostCollection.InsertOne(context.TODO(), inputPost)
+	result, err := database.PostCollection.InsertOne(context.TODO(), inputPost)
 
 	return result.InsertedID, err
 }
@@ -42,7 +39,7 @@ func AddPost(inputPost *Post) (interface{}, error) {
 // UpdatePosts - Update Post in MongoDB
 func UpdatePosts(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := PostCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
+	result, err := database.PostCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
 
 	return result, err
 }
@@ -50,14 +47,14 @@ func UpdatePosts(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult,
 // UpdatePostByOID - Update Post in MongoDB by its OID
 func UpdatePostByOID(oid primitive.ObjectID, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := PostCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
+	result, err := database.PostCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
 
 	return result, err
 }
 
 // DeletePostByOID - Delete Post by its OID
 func DeletePostByOID(oid primitive.ObjectID) error {
-	_, err := PostCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
+	_, err := database.PostCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
 	return err
 }
 
@@ -65,7 +62,7 @@ func DeletePostByOID(oid primitive.ObjectID) error {
 func FindPostByOID(oid primitive.ObjectID) (*Post, error) {
 	var post Post
 
-	err := PostCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&post)
+	err := database.PostCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&post)
 
 	return &post, err
 }
@@ -73,7 +70,7 @@ func FindPostByOID(oid primitive.ObjectID) (*Post, error) {
 // FindPosts - Find Multiple Posts by filterDetail
 func FindPosts(filterDetail bson.M, findOptions *options.FindOptions) ([]*Post, error) {
 	var posts []*Post
-	result, err := PostCollection.Find(context.TODO(), filterDetail, findOptions)
+	result, err := database.PostCollection.Find(context.TODO(), filterDetail, findOptions)
 	defer result.Close(context.TODO())
 
 	if err != nil {

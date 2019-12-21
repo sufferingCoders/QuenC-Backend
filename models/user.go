@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
+
 )
 
 // User - User Schema
@@ -41,7 +42,6 @@ var ( // Changing to env variables
 	projectionForRemovingPassword = bson.D{
 		{"password", 0},
 	}
-	userCollection      = database.DB.Collection("User")
 	verificationBaseURL = "https://shopping-au.appspot.com/user/activate/"
 )
 
@@ -52,7 +52,7 @@ func (u *User) IsAmin() bool {
 // AddUser - Adding User to MongoDB
 func AddUser(inputUser *User) (interface{}, error) {
 
-	result, err := userCollection.InsertOne(context.TODO(), inputUser)
+	result, err := database.UserCollection.InsertOne(context.TODO(), inputUser)
 
 	return result.InsertedID, err
 }
@@ -60,7 +60,7 @@ func AddUser(inputUser *User) (interface{}, error) {
 // UpdateUsers - Update User in MongoDB
 func UpdateUsers(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := userCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
+	result, err := database.UserCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
 
 	return result, err
 }
@@ -68,14 +68,14 @@ func UpdateUsers(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult,
 // UpdateUserByOID - Update User in MongoDB by its OID
 func UpdateUserByOID(oid primitive.ObjectID, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := userCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
+	result, err := database.UserCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
 
 	return result, err
 }
 
 // DeleteUserByOID - Delete user by its OID
 func DeleteUserByOID(oid primitive.ObjectID) error {
-	_, err := userCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
+	_, err := database.UserCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
 	return err
 }
 
@@ -83,7 +83,7 @@ func DeleteUserByOID(oid primitive.ObjectID) error {
 func FindUserByOID(oid primitive.ObjectID) (*User, error) {
 	var user User
 
-	err := userCollection.FindOne(context.TODO(), bson.M{"_id": oid},
+	err := database.UserCollection.FindOne(context.TODO(), bson.M{"_id": oid},
 		options.FindOne().SetProjection(projectionForRemovingPassword)).Decode(&user)
 
 	return &user, err
@@ -93,7 +93,7 @@ func FindUserByOID(oid primitive.ObjectID) (*User, error) {
 func FindUserByEmail(email string) (*User, error) {
 	var user User
 
-	err := userCollection.FindOne(context.TODO(), bson.M{"email": email},
+	err := database.UserCollection.FindOne(context.TODO(), bson.M{"email": email},
 		options.FindOne().SetProjection(projectionForRemovingPassword)).Decode(&user)
 
 	return &user, err
@@ -102,7 +102,7 @@ func FindUserByEmail(email string) (*User, error) {
 // FindUsers - Find Multiple Users by filterDetail
 func FindUsers(filterDetail bson.M) ([]*User, error) {
 	var users []*User
-	result, err := userCollection.Find(context.TODO(), filterDetail,
+	result, err := database.UserCollection.Find(context.TODO(), filterDetail,
 		options.Find().SetProjection(projectionForRemovingPassword))
 	defer result.Close(context.TODO())
 

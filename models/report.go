@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 type Report struct {
@@ -34,12 +35,11 @@ var (
 		"包含色情, 血腥, 暴力內容", // 4
 		"廣告和宣傳內容",        // 5
 	}
-	ReportCollection = database.DB.Collection("Report")
 )
 
 func AddReport(inputReport *Report) (interface{}, error) {
 
-	result, err := ReportCollection.InsertOne(context.TODO(), inputReport)
+	result, err := database.ReportCollection.InsertOne(context.TODO(), inputReport)
 
 	return result.InsertedID, err
 }
@@ -47,7 +47,7 @@ func AddReport(inputReport *Report) (interface{}, error) {
 // UpdateReports - Update Report in MongoDB
 func UpdateReports(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := ReportCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
+	result, err := database.ReportCollection.UpdateMany(context.TODO(), filterDetail, bson.M{"$set": updateDetail})
 
 	return result, err
 }
@@ -55,14 +55,14 @@ func UpdateReports(filterDetail bson.M, updateDetail bson.M) (*mongo.UpdateResul
 // UpdateReportByOID - Update Report in MongoDB by its OID
 func UpdateReportByOID(oid primitive.ObjectID, updateDetail bson.M) (*mongo.UpdateResult, error) {
 
-	result, err := ReportCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
+	result, err := database.ReportCollection.UpdateOne(context.TODO(), bson.M{"_id": oid}, bson.M{"$set": updateDetail})
 
 	return result, err
 }
 
 // DeleteReportByOID - Delete Report by its OID
 func DeleteReportByOID(oid primitive.ObjectID) error {
-	_, err := ReportCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
+	_, err := database.ReportCollection.DeleteOne(context.TODO(), bson.M{"_id": oid})
 	return err
 }
 
@@ -70,7 +70,7 @@ func DeleteReportByOID(oid primitive.ObjectID) error {
 func FindReportByOID(oid primitive.ObjectID) (*Report, error) {
 	var report Report
 
-	err := ReportCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&report)
+	err := database.ReportCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&report)
 
 	return &report, err
 }
@@ -78,7 +78,7 @@ func FindReportByOID(oid primitive.ObjectID) (*Report, error) {
 // FindReports - Find Multiple Reports by filterDetail
 func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*Report, error) {
 	var reports []*Report
-	result, err := ReportCollection.Find(context.TODO(), filterDetail, findOptions)
+	result, err := database.ReportCollection.Find(context.TODO(), filterDetail, findOptions)
 	defer result.Close(context.TODO())
 
 	if err != nil {

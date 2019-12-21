@@ -14,6 +14,6 @@ func InitUserRouter(router *gin.Engine) {
 		userRouter.POST("/auto-login", middlewares.UserAuth(), apis.TokenAutoLogin)
 		userRouter.GET("/send-verification-email", middlewares.UserAuth(), apis.SendVerificationEmailForUser)
 		userRouter.GET("/email/activate/:uid", apis.ActivateUserEmail)
-		userRouter.PATCH("/:uid",middlewares.UserAuth(), apis.UpdateUser)
+		userRouter.PATCH("/:uid", middlewares.UserAuth(), apis.UpdateUser)
 	}
 }

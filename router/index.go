@@ -1,4 +1,4 @@
-package routers
+package router
 
 import (
 	"context"
@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 var upGrader = websocket.Upgrader{
@@ -225,7 +226,6 @@ func InitRouter() *gin.Engine {
 	InitPostCategoryRouter(router)
 	InitPostRouter(router)
 	InitCommentRouter(router)
-
 
 	return router
 }
