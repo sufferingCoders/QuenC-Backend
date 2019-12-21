@@ -34,7 +34,22 @@
 |<ul><li>- [x] </li></ul>|Update|Must Have| 測試Update MongoDB Document| Richard | 20 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Listen to Change Stream|Must Have| 測試MongoDB ChangeStream | Richard | 20 Dec 2019 |
 |<ul><li>- [x] </li></ul>|寫MongoDB對接方法 在ReadMe|Must Have| 描述MongoDB對接 | Richard | 20 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|遷移User|Must Have| 建造User | Richard | |
+|<ul><li>- [x] </li></ul>|User Schema|Must Have| 設計User Schema | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Post Schema|Must Have| 設計Post Schema | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|PostCategory Schema|Must Have| 設計PostCategory Schema | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Comment Schema|Must Have| 設計Comment Schema | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Report Schema|Must Have| 設計Report Schema | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|User Api|Must Have| 完成 User Api 搭建 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Post Api|Must Have| 完成 Post Api 搭建 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|PostCategory Api|Must Have| 完成 PostCategory Api 搭建 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Comment Api|Must Have| 完成 Comment Api 搭建 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Report Api|Must Have| 完成 Report Api 搭建 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|User Router|Must Have| 完成 User Router 規劃 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Post Router|Must Have| 完成 Post Router 規劃 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|PostCategory Router|Must Have| 完成 PostCategory Router 規劃 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Comment Router|Must Have| 完成 Comment Router 規劃 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Report Router|Must Have| 完成 Report Router 規劃 | Richard | 21 Dec 2019 |
+|<ul><li>- [x] </li></ul>|User Stream|Must Have| 搭建WebSocket&ChangedStream給前端Subscribe MongoDBw特定User | Richard | 21 Dec 2019 |
 
 
 
