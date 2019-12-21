@@ -50,7 +50,7 @@
 |<ul><li>- [x] </li></ul>|Comment Router|Must Have| 完成 Comment Router 規劃 | Richard | 21 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Report Router|Must Have| 完成 Report Router 規劃 | Richard | 21 Dec 2019 |
 |<ul><li>- [x] </li></ul>|User Stream|Must Have| 搭建WebSocket&ChangedStream給前端Subscribe MongoDBw特定User | Richard | 21 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|接口對接|Must Have| 將Flutter前端和接口對接 | Richard | Doing |
+|<ul><li>- [ ] </li></ul>|接口對接|Must Have| 將Flutter前端和接口對接 | Richard | Richard Doing |
 |<ul><li>- [ ] </li></ul>|接口測試|Must Have| 測試已對接的接口 | Richard |  |
 
 
