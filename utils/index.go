@@ -15,7 +15,7 @@ import (
 )
 
 // SetupFindOptions - Setting up the FindOptions for the Query
-func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) {
+func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) error {
 
 	skip, limit, sort := c.Query("skip"), c.Query("limit"), c.Query("sort")
 
@@ -28,7 +28,7 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) {
 				"msg":  "Cannot setup skip",
 				"skip": skip,
 			})
-			return
+			return err
 		}
 		findOptions.SetSkip(inputSkip)
 	}
@@ -36,12 +36,12 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) {
 	if strings.TrimSpace(limit) != "" {
 		inputLimit, err := strconv.ParseInt(limit, 10, 64)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.AbortW(http.StatusBadRequest, gin.H{
 				"err":   err,
 				"msg":   "Cannot setup limit",
 				"limit": limit,
 			})
-			return
+			return err
 		}
 		findOptions.SetLimit(inputLimit)
 	}
@@ -57,7 +57,7 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) {
 					"s[1]": s[1],
 					"s[0]": s[0],
 				})
-				return
+				return err
 			}
 			// fmt.Printf("s is %+v\n", s)
 			// fmt.Printf("s[0] is %+v\n", s[0])
@@ -71,6 +71,8 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) {
 
 		findOptions.SetSort(sortMap)
 	}
+
+	return nil
 }
 
 func GetOID(id string, c *gin.Context) *primitive.ObjectID {

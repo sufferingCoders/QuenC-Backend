@@ -13,9 +13,8 @@ import (
 
 func AddPostCategory(c *gin.Context) {
 	var postCategory models.PostCategory
-	err := c.ShouldBindJSON(&postCategory)
 
-	if err != nil {
+	if err := c.ShouldBindJSON(&postCategory); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -23,17 +22,20 @@ func AddPostCategory(c *gin.Context) {
 		return
 	}
 
-	user := utils.GetUserFromContext(c)
+	if user := utils.GetUserFromContext(c); user == nil {
+		return
+	}
 
 	// Only admin can add post category
 
-	if !user.IsAmin() {
-		errStr := fmt.Sprintf("Only Admin can add post category")
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err": errStr,
-		})
-		return
-	}
+	// Do this in the Middleware
+	// if !user.IsAmin() {
+	// 	errStr := fmt.Sprintf("Only Admin can add post category")
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+	// 		"err": errStr,
+	// 	})
+	// 	return
+	// }
 
 	InsertedID, err := models.AddPostCategory(&postCategory)
 
@@ -49,8 +51,8 @@ func UpdatePostCategory(c *gin.Context) {
 	var updateFields map[string]interface{}
 
 	cid := c.Param("cid")
-	err := c.ShouldBindJSON(&updateFields)
-	if err != nil {
+
+	if err := c.ShouldBindJSON(&updateFields); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -58,9 +60,14 @@ func UpdatePostCategory(c *gin.Context) {
 		return
 	}
 
-	cOID := utils.GetOID(cid, c)
+	if cOID := utils.GetOID(cid, c); cOID = nil {
+		return
+	}
 
-	user := utils.GetUserFromContext(c)
+
+	if user := utils.GetUserFromContext(c); user == nil {
+		return 
+	}
 
 	if !user.IsAmin() {
 		errStr := fmt.Sprintf("Only Admin can update post category")
@@ -70,9 +77,7 @@ func UpdatePostCategory(c *gin.Context) {
 		return
 	}
 
-	result, err := models.UpdatePostCategoryByOID(*cOID, updateFields)
-
-	if err != nil {
+	if result, err := models.UpdatePostCategoryByOID(*cOID, updateFields); err != nil {
 		errStr := fmt.Sprintf("Cannot update the category: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -89,9 +94,13 @@ func UpdatePostCategory(c *gin.Context) {
 
 func DeletePostCategoryById(c *gin.Context) {
 	cid := c.Param("cid")
-	cOID := utils.GetOID(cid, c)
+	if cOID := utils.GetOID(cid, c); cOID == nil {
+		return 
+	}
 
-	user := utils.GetUserFromContext(c)
+	if user := utils.GetUserFromContext(c), user == nil {
+		return 
+	}
 
 	if !user.IsAmin() {
 		errStr := fmt.Sprintf("Only Admin can delete post category")
@@ -101,9 +110,7 @@ func DeletePostCategoryById(c *gin.Context) {
 		return
 	}
 
-	err := models.DeletePostCategoryByOID(*cOID)
-
-	if err != nil {
+	if err := models.DeletePostCategoryByOID(*cOID); err != nil {
 		errStr := fmt.Sprintf("Cannot delete the category: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -121,11 +128,11 @@ func DeletePostCategoryById(c *gin.Context) {
 
 func FindAllPostCategorys(c *gin.Context) {
 	findOption := options.Find()
-	utils.SetupFindOptions(findOption, c)
+	if err := utils.SetupFindOptions(findOption, c); err != nil {
+		return
+	}
 
-	postCategories, err := models.FindAllPostCategorys(findOption)
-
-	if err != nil {
+	if postCategories, err := models.FindAllPostCategorys(findOption); err != nil {
 		errStr := fmt.Sprintf("Cannot find the categories: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
@@ -140,11 +147,13 @@ func FindAllPostCategorys(c *gin.Context) {
 
 func FindPostCategoryByOID(c *gin.Context) {
 	cid := c.Param("cid")
-	cOID := utils.GetOID(cid, c)
+	if cOID := utils.GetOID(cid, c); cOID == nil {
+		return 
+	}
 
-	postCategory, err := models.FindPostCategoryByOID(*cOID)
+	
 
-	if err != nil {
+	if postCategory, err := models.FindPostCategoryByOID(*cOID); err != nil {
 		errStr := fmt.Sprintf("Cannot find the categories: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,

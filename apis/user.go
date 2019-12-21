@@ -264,6 +264,10 @@ func UpdateUser(c *gin.Context) {
 
 	user := utils.GetUserFromContext(c)
 
+	if user == nil {
+		return
+	}
+
 	UpsertedID, err := models.UpdateUserByOID(user.ID, updateUserInfo.UpdateDetail)
 
 	fmt.Printf("error is %+v\n", err)
