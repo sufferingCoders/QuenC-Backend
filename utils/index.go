@@ -126,3 +126,11 @@ func GetUserFromContext(c *gin.Context) *models.User {
 
 	return user
 }
+
+func GetDomainFromEmail(email string) string {
+	emailParts := strings.Split(email, "@")
+	if len(emailParts) > 2 {
+		return ""
+	}
+	return emailParts[1]
+}

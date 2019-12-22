@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"quenc/models"
 	"quenc/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -36,10 +37,10 @@ type UpdateUserInfo struct {
 }
 
 func SingupUser(c *gin.Context) {
-	var user models.User
-	err := c.ShouldBindJSON(&user)
+	var singupInfo SingupInfo
+	err := c.ShouldBindJSON(&singupInfo)
 
-	fmt.Printf("err %+v", err)
+	// Create a User in the backend
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -49,28 +50,47 @@ func SingupUser(c *gin.Context) {
 		return
 	}
 
-	if foundUser, err := models.FindUserByEmail(user.Email); foundUser != nil || err != nil {
+	if foundUser, err := models.FindUserByEmail(singupInfo.Email); foundUser != nil || err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err":       err,
-			"msg":       "The email has been used",
-			"user":      user,
-			"foundUser": foundUser,
+			"err":        err,
+			"msg":        "The email has been used",
+			"singupInfo": singupInfo,
+			"foundUser":  foundUser,
 		})
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(singupInfo.Password), bcrypt.DefaultCost)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"err":  err,
-			"msg":  "Cannot hash the Password",
-			"user": user,
+			"err":        err,
+			"msg":        "Cannot hash the Password",
+			"singupInfo": singupInfo,
 		})
 		return
 	}
-	user.Password = string(hashedPassword)
-	user.EmailVerified = false
+
+	// Creating user here
+
+	user := models.User{
+		Domain:        utils.GetDomainFromEmail(singupInfo.Email),
+		Email:         singupInfo.Email,
+		Password:      string(hashedPassword),
+		PhotoURL:      "",
+		Major:         "",
+		Role:          1,
+		Gender:        -1,
+		EmailVerified: false,
+		LastSeen:      primitive.NewDateTimeFromTime(time.Now()),
+		Dob:           primitive.NewDateTimeFromTime(time.Now()),
+		CreatedAt:     primitive.NewDateTimeFromTime(time.Now()),
+		ChatRooms:     []string{},
+		Friends:       []string{},
+		LikePosts:     []string{},
+		LikeComments:  []string{},
+		SavedPosts:    []string{},
+	}
 
 	InsertedID, err := models.AddUser(&user)
 
@@ -297,6 +317,49 @@ func UpdateUser(c *gin.Context) {
 			"UpdateUserInfo": updateUserInfo,
 		},
 	)
+
+}
+
+func ToggleFunc(field string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		condition := c.Param("codition")
+		id := c.Param("id")
+
+		var adding bool
+
+		if condition == "1" {
+			adding = true
+		} else if condition == "0" {
+			adding = false
+		} else {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": "You didn't give a compatible condition",
+			})
+			return
+		}
+
+		user := utils.GetUserFromContext(c)
+
+		if user == nil {
+			return
+		}
+
+		result, err := models.ToggleElementToUserArray(field, adding, id, user.ID)
+
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot toggle the condition: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+			})
+			return
+		}
+
+		c.JSON(
+			http.StatusOK, gin.H{
+				"result": result,
+			},
+		)
+	}
 
 }
 

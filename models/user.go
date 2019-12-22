@@ -16,23 +16,23 @@ import (
 
 // User - User Schema
 type User struct {
-	ID            primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
-	Domain        string               `json:"domain" bson:"domain"`
-	Email         string               `json:"email" bson:"email"`
-	Password      string               `json:"password" bson:"password"`
-	PhotoURL      string               `json:"photoURL" bson:"photoURL"`
-	Role          int                  `json:"role" bson:"role"`
-	Gender        int                  `json:"gender" bson:"gender"`
-	EmailVerified bool                 `json:"emailVerified" bson:"emailVerified"`
-	LastSeen      primitive.DateTime   `json:"lastSeen" bson:"lastSeen"`
-	Dob           primitive.DateTime   `json:"dob" bson:"dob"`
-	CreatedAt     primitive.DateTime   `json:"createdAt" bson:"createdAt"`
-	ChatRooms     []primitive.ObjectID `json:"chatRooms" bson:"chatRooms"`
-	Friends       []primitive.ObjectID `json:"friends" bson:"friends"`
-	Major         []primitive.ObjectID `json:"major" bson:"major"`
-	LikePosts     []primitive.ObjectID `json:"likePosts" bson:"likePosts"`
-	LikeComments  []primitive.ObjectID `json:"likeComments" bson:"likeComments"`
-	SavedPosts    []primitive.ObjectID `json:"savedPosts" bson:"savedPosts"`
+	ID            primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Domain        string             `json:"domain" bson:"domain"`
+	Email         string             `json:"email" bson:"email"`
+	Password      string             `json:"password" bson:"password"`
+	PhotoURL      string             `json:"photoURL" bson:"photoURL"`
+	Major         string             `json:"major" bson:"major"`
+	Role          int                `json:"role" bson:"role"`
+	Gender        int                `json:"gender" bson:"gender"`
+	EmailVerified bool               `json:"emailVerified" bson:"emailVerified"`
+	LastSeen      primitive.DateTime `json:"lastSeen" bson:"lastSeen"`
+	Dob           primitive.DateTime `json:"dob" bson:"dob"`
+	CreatedAt     primitive.DateTime `json:"createdAt" bson:"createdAt"`
+	ChatRooms     []string           `json:"chatRooms" bson:"chatRooms"`
+	Friends       []string           `json:"friends" bson:"friends"`
+	LikePosts     []string           `json:"likePosts" bson:"likePosts"`
+	LikeComments  []string           `json:"likeComments" bson:"likeComments"`
+	SavedPosts    []string           `json:"savedPosts" bson:"savedPosts"`
 }
 
 var ( // Changing to env variables
@@ -172,4 +172,16 @@ func WatchUserByOID(oid primitive.ObjectID) (*mongo.ChangeStream, error) {
 	return stream, err
 }
 
+// Liked Comment, Saved Comment, Saved Posts
 
+func ToggleElementToUserArray(field string, adding bool, element string, uOID primitive.ObjectID) (*mongo.UpdateResult, error) {
+
+	var result *mongo.UpdateResult
+	var err error
+	if adding {
+		result, err = database.UserCollection.UpdateOne(context.TODO(), bson.M{"_id": uOID}, bson.M{"$push": bson.M{field: element}})
+	} else {
+		result, err = database.UserCollection.UpdateOne(context.TODO(), bson.M{"_id": uOID}, bson.M{"$pull": bson.M{field: element}})
+	}
+	return result, err
+}
