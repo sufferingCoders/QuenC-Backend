@@ -21,26 +21,29 @@ func SetupFindOptions(findOptions *options.FindOptions, c *gin.Context) error {
 	skip, limit, sort := c.Query("skip"), c.Query("limit"), c.Query("sort")
 
 	sortMap := map[string]int{}
-	if strings.TrimSpace(sort) != "" {
-		if s := strings.Split(sort, "_"); len(s) == 2 {
-			sortOrd, err := strconv.Atoi(s[1])
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"err":  err,
-					"msg":  "Cannot get the sort order",
-					"s[1]": s[1],
-					"s[0]": s[0],
-				})
-				return err
-			}
-			// fmt.Printf("s is %+v\n", s)
-			// fmt.Printf("s[0] is %+v\n", s[0])
-			// fmt.Printf("s[1] is %+v\n", s[1])
-			// fmt.Printf("sortOrd is %+v\n", sortOrd)
+	if strings.TrimSpace(sort) != "" { // Expect "createdAt_1,likeCount_-1"
+		sortedRequire := strings.Split(sort, ",")
+		for _, sr := range sortedRequire {
+			if s := strings.Split(sr, "_"); len(s) == 2 {
+				sortOrd, err := strconv.Atoi(s[1])
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{
+						"err":  err,
+						"msg":  "Cannot get the sort order",
+						"s[1]": s[1],
+						"s[0]": s[0],
+					})
+					return err
+				}
+				// fmt.Printf("s is %+v\n", s)
+				// fmt.Printf("s[0] is %+v\n", s[0])
+				// fmt.Printf("s[1] is %+v\n", s[1])
+				// fmt.Printf("sortOrd is %+v\n", sortOrd)
 
-			sortMap[s[0]] = sortOrd
-		} else {
-			sortMap[sort] = -1
+				sortMap[s[0]] = sortOrd
+			} else {
+				sortMap[sort] = -1
+			}
 		}
 
 		findOptions.SetSort(sortMap)
