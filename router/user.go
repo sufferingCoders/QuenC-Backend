@@ -14,11 +14,11 @@ func InitUserRouter(router *gin.Engine) {
 		userRouter.POST("/auto-login", middlewares.UserAuth(), apis.TokenAutoLogin)
 		userRouter.GET("/send-verification-email", middlewares.UserAuth(), apis.SendVerificationEmailForUser)
 		userRouter.GET("/email/activate/:uid", apis.ActivateUserEmail)
-		userRouter.PATCH("/:uid", middlewares.UserAuth(), apis.UpdateUser)
+		userRouter.PATCH("/detail/:uid", middlewares.UserAuth(), apis.UpdateUser)
 		userRouter.PATCH("/friends/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("friends"))
 		userRouter.PATCH("/chat-rooms/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("chatRooms"))
 		userRouter.PATCH("/like-posts/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likePosts"))
-		userRouter.PATCH("/like-comments/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likeComments"))
+		userRouter.PATCH("/like-com	ents/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likeComments"))
 		userRouter.PATCH("/saved-posts/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("savedPosts"))
 	}
 }

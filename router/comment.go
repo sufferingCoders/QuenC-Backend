@@ -13,5 +13,6 @@ func InitCommentRouter(router *gin.Engine) {
 		commentRouter.PATCH("/:cid", middlewares.AdminAuth(), apis.UpdateComment)
 		commentRouter.DELETE("/:cid", middlewares.AdminAuth(), apis.DeleteComment)
 		commentRouter.GET("/post/:pid", apis.FindCommentsByPost)
+		commentRouter.GET("/detail/:cid", apis.FindCommentById)
 	}
 }

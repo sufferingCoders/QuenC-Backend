@@ -7,6 +7,7 @@ import (
 	"quenc/database"
 	"quenc/models"
 	"quenc/utils"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,6 +51,11 @@ func UpdatePost(c *gin.Context) {
 	var result *mongo.UpdateResult
 	var updateFields map[string]interface{}
 	pid := c.Param("pid")
+
+	// Remove some fields so it can be modified
+
+	delete(updateFields, "_id")
+	delete(updateFields, "createdAt")
 
 	if err = c.ShouldBind(&updateFields); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
@@ -196,6 +202,77 @@ func FindPostByAuthor(c *gin.Context) {
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the post: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"posts": posts,
+	})
+}
+
+func FindSavedPost(c *gin.Context) {
+	user := utils.GetUserFromContext(c)
+	if user == nil {
+		return
+	}
+
+	findOption := options.Find()
+	utils.SetupFindOptions(findOption, c)
+
+	// makin the save post to ObjectID
+
+	savedOIDs := []*primitive.ObjectID{}
+	for _, savedId := range user.SavedPosts {
+		oid := utils.GetOID(savedId, c)
+		if oid == nil {
+			return
+		}
+
+		savedOIDs = append(savedOIDs, oid)
+	}
+
+	posts, err := models.FindPosts(bson.M{"_id": bson.M{"$in": savedOIDs}}, findOption)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot find the SavedPosts: %+v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"posts": posts,
+	})
+}
+
+func FindArrayOfPosts(c *gin.Context) {
+
+	postsStr := c.Param("posts")
+
+	postsStrIDs := strings.Split(postsStr, ",")
+
+	postsOID := []*primitive.ObjectID{}
+
+	for _, id := range postsStrIDs {
+		oid := utils.GetOID(id, c)
+		if oid == nil {
+			return
+		}
+
+		postsOID = append(postsOID, oid)
+	}
+
+	findOption := options.Find()
+	utils.SetupFindOptions(findOption, c)
+
+	// makin the save post to ObjectID
+
+	posts, err := models.FindPosts(bson.M{"_id": bson.M{"$in": postsOID}}, findOption)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot find the posts : %+v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
 		})
 	}

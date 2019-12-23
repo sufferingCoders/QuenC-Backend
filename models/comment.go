@@ -13,7 +13,7 @@ import (
 
 type Comment struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	BelongPost   primitive.ObjectID `json:"belongPost" bson:"belongPost"`
+	BelongPost   string             `json:"belongPost" bson:"belongPost"`
 	Author       string             `json:"author" bson:"author"`
 	AuthorDomain string             `json:"authorDomain" bson:"authorDomain"`
 	Content      string             `json:"content" bson:"content"`
@@ -89,3 +89,5 @@ func FindCommentByPost(uOID primitive.ObjectID, findOptions *options.FindOptions
 	comments, err := FindComments(bson.M{"author": uOID}, findOptions)
 	return comments, err
 }
+
+

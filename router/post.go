@@ -15,5 +15,7 @@ func InitPostRouter(router *gin.Engine) {
 		postRouter.GET("/all", apis.FindAllPost)
 		postRouter.GET("/author/:aid", apis.FindPostByAuthor)
 		postRouter.GET("/detail/:pid", apis.FindPostById)
+		postRouter.GET("/saved", middlewares.UserAuth(), apis.FindSavedPost)
+		postRouter.GET("/array", apis.FindArrayOfPosts)
 	}
 }

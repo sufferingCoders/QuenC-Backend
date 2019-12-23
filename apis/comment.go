@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 func AddComment(c *gin.Context) {
@@ -156,5 +157,29 @@ func FindCommentsByPost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"comments": comments,
+	})
+}
+
+func FindCommentById(c *gin.Context) {
+	cid := c.Param("cid")
+	cOID := utils.GetOID(cid, c)
+	if cOID == nil {
+		return
+	}
+
+	comment, err := models.FindCommentByOID(*cOID)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot find the commennt: %+v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+			"cid": cid,
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"comment": comment,
 	})
 }
