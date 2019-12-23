@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"quenc/database"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,8 +25,8 @@ type Post struct {
 	PreviewText  string             `json:"previewText" bson:"previewText"`
 	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
 	Category     string             `json:"category" bson:"category"`
-	UpdatedAt    primitive.DateTime `json:"updatedAt" bson:"updatedAt"`
-	CreatedAt    primitive.DateTime `json:"createdAt" bson:"createdAt"`
+	UpdatedAt    time.Time          `json:"updatedAt" bson:"updatedAt"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
 }
 
 // AddPost - Adding Post to MongoDB

@@ -267,8 +267,8 @@ func LoginUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	var updateUserInfo UpdateUserInfo
-	err := c.ShouldBindJSON(&updateUserInfo)
+	var UpdateFields map[string]interface{}
+	err := c.ShouldBindJSON(&UpdateFields)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -278,7 +278,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if updateUserInfo.UpdateDetail["password"] != nil {
+	if UpdateFields["password"] != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": "Using change-password node to change password",
 			"msg": "Using change-password node to change password",
@@ -293,7 +293,7 @@ func UpdateUser(c *gin.Context) {
 	}
 	// Admin should be able to do
 
-	UpsertedID, err := models.UpdateUserByOID(user.ID, updateUserInfo.UpdateDetail)
+	UpsertedID, err := models.UpdateUserByOID(user.ID, UpdateFields)
 
 	fmt.Printf("error is %+v\n", err)
 
@@ -304,7 +304,7 @@ func UpdateUser(c *gin.Context) {
 				"err":            err,
 				"msg":            "Cannot update this user",
 				"user":           user,
-				"UpdateUserInfo": updateUserInfo,
+				"UpdateUserInfo": UpdateFields,
 			},
 		)
 		return
@@ -314,7 +314,7 @@ func UpdateUser(c *gin.Context) {
 		http.StatusOK,
 		gin.H{
 			"UpsertedID":     UpsertedID,
-			"UpdateUserInfo": updateUserInfo,
+			"UpdateUserInfo": UpdateFields,
 		},
 	)
 

@@ -9,7 +9,7 @@ import "quenc/apis"
 func InitPostRouter(router *gin.Engine) {
 	postRouter := router.Group("/post")
 	{
-		postRouter.POST("", middlewares.UserAuth(), apis.AddPost)
+		postRouter.POST("/", middlewares.UserAuth(), apis.AddPost)
 		postRouter.PATCH("/:pid", middlewares.UserAuth(), apis.UpdatePost)
 		postRouter.DELETE("/:pid", middlewares.UserAuth(), apis.DeletePost)
 		postRouter.GET("/all", apis.FindAllPost)

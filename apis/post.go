@@ -8,6 +8,7 @@ import (
 	"quenc/models"
 	"quenc/utils"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,6 +30,17 @@ func AddPost(c *gin.Context) {
 		})
 		return
 	}
+
+	user := utils.GetUserFromContext(c)
+	if user == nil {
+		return
+	}
+	post.AuthorDomain = user.Domain
+	post.AuthorGender = user.Gender
+	post.Author = user.ID.Hex()
+	post.CreatedAt = time.Now()
+	post.UpdatedAt = time.Now()
+
 	InsertedID, err := models.AddPost(&post)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot add this post: %+v", err)
