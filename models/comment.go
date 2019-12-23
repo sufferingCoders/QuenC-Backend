@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"quenc/database"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,8 +20,8 @@ type Comment struct {
 	Content      string             `json:"content" bson:"content"`
 	AuthorGender int                `json:"authorGender" bson:"authorGender"`
 	LikeCount    int                `json:"likeCount" bson:"likeCount"`
-	UpdatedAt    primitive.DateTime `json:"updatedAt" bson:"updatedAt"`
-	CreatedAt    primitive.DateTime `json:"createdAt" bson:"createdAt"`
+	UpdatedAt    time.Time          `json:"updatedAt" bson:"updatedAt"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
 }
 
 // AddComment - Adding Comment to MongoDB
@@ -89,5 +90,3 @@ func FindCommentByPost(uOID primitive.ObjectID, findOptions *options.FindOptions
 	comments, err := FindComments(bson.M{"author": uOID}, findOptions)
 	return comments, err
 }
-
-

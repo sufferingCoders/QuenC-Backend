@@ -90,6 +90,52 @@ func FindPosts(filterDetail bson.M, findOptions *options.FindOptions) ([]*Post, 
 	return posts, nil
 }
 
+// Giving pipeline here
+func FindPostsPreview() ([]*Post, error) {
+	var posts []*Post
+
+	pipeline := []bson.M{
+		bson.M{"$sort": bson.M{"createdAt": -1}},
+		bson.M{"$limit": 30},
+		bson.M{"$lookup": bson.M{
+			"from":         "User",
+			"localField":   "author",
+			"foreignField": "_id",
+			"as":           "authorObj",
+		},
+		},
+		bson.M{
+			"$project": bson.M{
+				"authorObj":    bson.M{"$arrayElemAt": bson.A{"$authorObj", 0}},
+				"_id":          1,
+				"previewText":  1,
+				"previewPhoto": 1,
+				"title":        1,
+				"category":     1,
+			},
+		},
+	}
+
+	result, err := database.PostCategoryCollection.Aggregate(context.TODO(), pipeline)
+	defer result.Close(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	for result.Next(context.TODO()) {
+		var elem Post
+		err := result.Decode(&elem)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, &elem)
+	}
+
+	return posts, nil
+
+}
+
 // FindPostByAuthor - find posts for certain author
 func FindPostByAuthor(uOID primitive.ObjectID, findOptions *options.FindOptions) ([]*Post, error) {
 	posts, err := FindPosts(bson.M{"author": uOID}, findOptions)

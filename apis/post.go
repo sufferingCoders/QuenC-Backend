@@ -68,6 +68,9 @@ func UpdatePost(c *gin.Context) {
 
 	delete(updateFields, "_id")
 	delete(updateFields, "createdAt")
+	delete(updateFields, "authorGender")
+	delete(updateFields, "authorDomain")
+	delete(updateFields, "author")
 
 	if err = c.ShouldBind(&updateFields); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)

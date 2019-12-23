@@ -137,3 +137,5 @@ func GetDomainFromEmail(email string) string {
 	}
 	return emailParts[1]
 }
+
+

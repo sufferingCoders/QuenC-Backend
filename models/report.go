@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"quenc/database"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,9 +22,9 @@ type Report struct {
 	ReportTarget int                `json:"reportTarget" bson:"reportTarget"`
 	ReportType   int                `json:"reportType" bson:"reportType"`
 	Solve        bool               `json:"solve" bson:"solve"`
-	Author       primitive.ObjectID `json:"author" bson:"author"`
-	ReportID     primitive.ObjectID `json:"reportId" bson:"reportId"`
-	CreatedAt    primitive.DateTime `json:"createdAt" bson:"createdAt"`
+	Author       string             `json:"author" bson:"author"`
+	ReportID     string             `json:"reportId" bson:"reportId"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
 }
 
 var (

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"quenc/models"
 	"quenc/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,6 +27,19 @@ func AddComment(c *gin.Context) {
 		})
 		return
 	}
+
+	user := utils.GetUserFromContext(c)
+
+	if user == nil {
+		return
+	}
+
+	comment.Author = user.ID.Hex()
+	comment.AuthorDomain = user.Domain
+	comment.AuthorGender = user.Gender
+	comment.CreatedAt = time.Now()
+	comment.UpdatedAt = time.Now()
+
 	InsertedID, err := models.AddComment(&comment)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot add this Comment: %+v", err)
@@ -58,6 +72,13 @@ func UpdateComment(c *gin.Context) {
 		})
 		return
 	}
+
+	delete(updateFields, "_id")
+	delete(updateFields, "createdAt")
+	delete(updateFields, "authorGender")
+	delete(updateFields, "authorDomain")
+	delete(updateFields, "author")
+	delete(updateFields, "likeCount")
 
 	// Only Admin and Author can update the Comment
 	cOID := utils.GetOID(cid, c)

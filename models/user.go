@@ -53,7 +53,6 @@ func (u *User) IsAmin() bool {
 func AddUser(inputUser *User) (interface{}, error) {
 
 	result, err := database.UserCollection.InsertOne(context.TODO(), inputUser)
-
 	return result.InsertedID, err
 }
 

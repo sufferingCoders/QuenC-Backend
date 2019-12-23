@@ -84,6 +84,7 @@ func UpdatePostCategory(c *gin.Context) {
 		})
 		return
 	}
+	delete(updateFields, "_id")
 	result, err := models.UpdatePostCategoryByOID(*cOID, updateFields)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot update the category: %+v", err)

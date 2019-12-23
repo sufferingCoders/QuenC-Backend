@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"quenc/models"
 	"quenc/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 // 若回傳nil 直接Return
@@ -25,6 +27,18 @@ func AddReport(c *gin.Context) {
 		})
 		return
 	}
+
+	user := utils.GetUserFromContext(c)
+	if user == nil {
+		return
+	}
+
+	report.AuthorDomain = user.Domain
+	report.AuthorGender = user.Gender
+	report.Author = user.ID.Hex()
+	report.CreatedAt = time.Now()
+	report.Solve = false
+
 	InsertedID, err := models.AddReport(&report)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot add this Report: %+v", err)
@@ -35,7 +49,6 @@ func AddReport(c *gin.Context) {
 	}
 
 	report.ID = InsertedID.(primitive.ObjectID)
-
 	c.JSON(http.StatusOK, gin.H{
 		"report": report,
 	})
@@ -68,6 +81,12 @@ func UpdateReport(c *gin.Context) {
 	if rOID == nil {
 		return
 	}
+
+	delete(updateFields, "_id")
+	delete(updateFields, "authorGender")
+	delete(updateFields, "author")
+	delete(updateFields, "authorDomain")
+	delete(updateFields, "createdAt")
 
 	result, err = models.UpdateReportByOID(*rOID, updateFields)
 
