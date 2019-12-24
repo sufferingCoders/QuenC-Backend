@@ -15,28 +15,14 @@ import (
 type Report struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	Content      string             `json:"content" bson:"content"`
-	AuthorDomain string             `json:"authorDomain" bson:"authorDomain"`
 	PreviewText  string             `json:"previewText" bson:"previewText"`
 	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
-	AuthorGender int                `json:"authorGender" bson:"authorGender"`
 	ReportTarget int                `json:"reportTarget" bson:"reportTarget"`
-	ReportType   int                `json:"reportType" bson:"reportType"`
 	Solve        bool               `json:"solve" bson:"solve"`
-	Author       string             `json:"author" bson:"author"`
-	ReportID     string             `json:"reportId" bson:"reportId"`
+	Author       primitive.ObjectID `json:"author" bson:"author"`
+	ReportID     primitive.ObjectID `json:"reportId" bson:"reportId"`
 	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
 }
-
-var (
-	reportTypeCodeList = []string{
-		"其他",             // 0
-		"謾罵他人",           // 1
-		"惡意洗版",           // 2
-		"惡意洩漏他人資料",       // 3
-		"包含色情, 血腥, 暴力內容", // 4
-		"廣告和宣傳內容",        // 5
-	}
-)
 
 func AddReport(inputReport *Report) (interface{}, error) {
 

@@ -14,19 +14,17 @@ import (
 
 // Post -Post Schema
 type Post struct {
-	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	AuthorGender int                `json:"authorGender" bson:"authorGender"`
-	LikeCount    int                `json:"likeCount" bson:"likeCount"`
-	Anonymous    bool               `json:"anonymous" bson:"anonymous"`
-	Title        string             `json:"title" bson:"title"`
-	Author       string             `json:"author" bson:"author"`
-	AuthorDomain string             `json:"authorDomain" bson:"authorDomain"`
-	Content      string             `json:"content" bson:"content"`
-	PreviewText  string             `json:"previewText" bson:"previewText"`
-	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
-	Category     string             `json:"category" bson:"category"`
-	UpdatedAt    time.Time          `json:"updatedAt" bson:"updatedAt"`
-	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+	ID           primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
+	Anonymous    bool                 `json:"anonymous" bson:"anonymous"`
+	Title        string               `json:"title" bson:"title"`
+	Author       primitive.ObjectID   `json:"author" bson:"author"`
+	Content      string               `json:"content" bson:"content"`
+	PreviewText  string               `json:"previewText" bson:"previewText"`
+	PreviewPhoto string               `json:"previewPhoto" bson:"previewPhoto"`
+	Category     primitive.ObjectID   `json:"category" bson:"category"`
+	Likers       []primitive.ObjectID `json:"likers" bson:"likers"`
+	UpdatedAt    time.Time            `json:"updatedAt" bson:"updatedAt"`
+	CreatedAt    time.Time            `json:"createdAt" bson:"createdAt"`
 }
 
 // AddPost - Adding Post to MongoDB
@@ -90,6 +88,22 @@ func FindPosts(filterDetail bson.M, findOptions *options.FindOptions) ([]*Post, 
 	return posts, nil
 }
 
+func ToggleLikerForPost(pOID primitive.ObjectID, uOID primitive.ObjectID, like bool) (*mongo.UpdateResult, error) {
+	var pullOrPush string
+	if like {
+		pullOrPush = "$push"
+	} else {
+		pullOrPush = "$pull"
+	}
+
+	result, err := database.PostCategoryCollection.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": pOID},
+		bson.M{pullOrPush: bson.M{"likers": uOID}},
+	)
+	return result, err
+}
+
 // Giving pipeline here
 func FindPostsPreview() ([]*Post, error) {
 	var posts []*Post
@@ -117,20 +131,21 @@ func FindPostsPreview() ([]*Post, error) {
 	}
 
 	result, err := database.PostCategoryCollection.Aggregate(context.TODO(), pipeline)
+	result.All(context.TODO(), &posts)
 	defer result.Close(context.TODO())
 
 	if err != nil {
 		return nil, err
 	}
 
-	for result.Next(context.TODO()) {
-		var elem Post
-		err := result.Decode(&elem)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, &elem)
-	}
+	// for result.Next(context.TODO()) {
+	// 	var elem Post
+	// 	err := result.Decode(&elem)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	posts = append(posts, &elem)
+	// }
 
 	return posts, nil
 

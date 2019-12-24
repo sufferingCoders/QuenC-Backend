@@ -35,9 +35,7 @@ func AddPost(c *gin.Context) {
 	if user == nil {
 		return
 	}
-	post.AuthorDomain = user.Domain
-	post.AuthorGender = user.Gender
-	post.Author = user.ID.Hex()
+	post.Author = user.ID
 	post.CreatedAt = time.Now()
 	post.UpdatedAt = time.Now()
 
@@ -68,8 +66,6 @@ func UpdatePost(c *gin.Context) {
 
 	delete(updateFields, "_id")
 	delete(updateFields, "createdAt")
-	delete(updateFields, "authorGender")
-	delete(updateFields, "authorDomain")
 	delete(updateFields, "author")
 
 	if err = c.ShouldBind(&updateFields); err != nil {
@@ -295,4 +291,46 @@ func FindArrayOfPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"posts": posts,
 	})
+}
+
+func LikePost(c *gin.Context) {
+	pid := c.Param("pid")
+	pOID := utils.GetOID(pid, c)
+
+	con := c.Param("condition")
+
+	var like bool
+
+	if con == "1" {
+		like = true
+	} else {
+		like = false
+	}
+
+	if pOID == nil {
+		return
+	}
+
+	user := utils.GetUserFromContext(c)
+
+	if user == nil {
+		return
+	}
+
+	result, err := models.ToggleLikerForPost(*pOID, user.ID, like)
+
+	if err != nil {
+		errStr := fmt.Sprint("Cannnot toggle the post like: %+v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"result": result,
+		"uid":    user.ID.Hex(),
+		"pid":    pid,
+	})
+
 }

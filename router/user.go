@@ -18,7 +18,7 @@ func InitUserRouter(router *gin.Engine) {
 		userRouter.PATCH("/friends/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("friends"))
 		userRouter.PATCH("/chat-rooms/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("chatRooms"))
 		userRouter.PATCH("/like-posts/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likePosts"))
-		userRouter.PATCH("/like-com	ents/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likeComments"))
+		userRouter.PATCH("/like-comments/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likeComments"))
 		userRouter.PATCH("/saved-posts/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("savedPosts"))
 		userRouter.GET("/subsrible", middlewares.UserAuth(), apis.SubscribeUser)
 	}

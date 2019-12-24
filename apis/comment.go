@@ -34,9 +34,7 @@ func AddComment(c *gin.Context) {
 		return
 	}
 
-	comment.Author = user.ID.Hex()
-	comment.AuthorDomain = user.Domain
-	comment.AuthorGender = user.Gender
+	comment.Author = user.ID
 	comment.CreatedAt = time.Now()
 	comment.UpdatedAt = time.Now()
 
@@ -75,10 +73,7 @@ func UpdateComment(c *gin.Context) {
 
 	delete(updateFields, "_id")
 	delete(updateFields, "createdAt")
-	delete(updateFields, "authorGender")
-	delete(updateFields, "authorDomain")
 	delete(updateFields, "author")
-	delete(updateFields, "likeCount")
 
 	// Only Admin and Author can update the Comment
 	cOID := utils.GetOID(cid, c)
@@ -203,4 +198,46 @@ func FindCommentById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"comment": comment,
 	})
+}
+
+func LikeComment(c *gin.Context) {
+	cid := c.Param("cid")
+	cOID := utils.GetOID(cid, c)
+
+	con := c.Param("condition")
+
+	var like bool
+
+	if con == "1" {
+		like = true
+	} else {
+		like = false
+	}
+
+	if cOID == nil {
+		return
+	}
+
+	user := utils.GetUserFromContext(c)
+
+	if user == nil {
+		return
+	}
+
+	result, err := models.ToggleLikerForComment(*cOID, user.ID, like)
+
+	if err != nil {
+		errStr := fmt.Sprint("Cannnot toggle the post like: %+v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"result": result,
+		"uid":    user.ID.Hex(),
+		"cid":    cid,
+	})
+
 }

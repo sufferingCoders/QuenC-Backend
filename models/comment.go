@@ -13,15 +13,13 @@ import (
 )
 
 type Comment struct {
-	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	BelongPost   string             `json:"belongPost" bson:"belongPost"`
-	Author       string             `json:"author" bson:"author"`
-	AuthorDomain string             `json:"authorDomain" bson:"authorDomain"`
-	Content      string             `json:"content" bson:"content"`
-	AuthorGender int                `json:"authorGender" bson:"authorGender"`
-	LikeCount    int                `json:"likeCount" bson:"likeCount"`
-	UpdatedAt    time.Time          `json:"updatedAt" bson:"updatedAt"`
-	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+	ID         primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
+	BelongPost primitive.ObjectID   `json:"belongPost" bson:"belongPost"`
+	Author     primitive.ObjectID   `json:"author" bson:"author"`
+	Content    string               `json:"content" bson:"content"`
+	Likers     []primitive.ObjectID `json:"likers" bson:"likers"`
+	UpdatedAt  time.Time            `json:"updatedAt" bson:"updatedAt"`
+	CreatedAt  time.Time            `json:"createdAt" bson:"createdAt"`
 }
 
 // AddComment - Adding Comment to MongoDB
@@ -89,4 +87,20 @@ func FindComments(filterDetail bson.M, findOptions *options.FindOptions) ([]*Com
 func FindCommentByPost(uOID primitive.ObjectID, findOptions *options.FindOptions) ([]*Comment, error) {
 	comments, err := FindComments(bson.M{"author": uOID}, findOptions)
 	return comments, err
+}
+
+func ToggleLikerForComment(cOID primitive.ObjectID, uOID primitive.ObjectID, like bool) (*mongo.UpdateResult, error) {
+	var pullOrPush string
+	if like {
+		pullOrPush = "$push"
+	} else {
+		pullOrPush = "$pull"
+	}
+
+	result, err := database.CommentCollection.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": cOID},
+		bson.M{pullOrPush: bson.M{"likers": uOID}},
+	)
+	return result, err
 }

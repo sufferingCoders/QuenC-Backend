@@ -33,9 +33,7 @@ func AddReport(c *gin.Context) {
 		return
 	}
 
-	report.AuthorDomain = user.Domain
-	report.AuthorGender = user.Gender
-	report.Author = user.ID.Hex()
+	report.Author = user.ID
 	report.CreatedAt = time.Now()
 	report.Solve = false
 
