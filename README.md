@@ -52,7 +52,6 @@
 |<ul><li>- [x] </li></ul>|User Stream|Must Have| 搭建WebSocket&ChangedStream給前端Subscribe MongoDBw特定User | Richard | 21 Dec 2019 |
 |<ul><li>- [x] </li></ul>|將User下的LikePosts和LikeComments取消|Must Have| 在Comment&Post中增加 Likers field| Richard | 26 Dec 2019 |
 |<ul><li>- [x] </li></ul>|刪除AuthorGender&AuthorDomain|Must Have| 用Population的方式來取代 | Richard | 26 Dec 2019 |
-
 |<ul><li>- [x] </li></ul>|User migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Report migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Post migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
