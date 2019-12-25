@@ -50,7 +50,14 @@
 |<ul><li>- [x] </li></ul>|Comment Router|Must Have| 完成 Comment Router 規劃 | Richard | 21 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Report Router|Must Have| 完成 Report Router 規劃 | Richard | 21 Dec 2019 |
 |<ul><li>- [x] </li></ul>|User Stream|Must Have| 搭建WebSocket&ChangedStream給前端Subscribe MongoDBw特定User | Richard | 21 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|User 接口對接|Must Have| 將Flutter前端和後端User接口對接 | Richard | Richard Doing |
+|<ul><li>- [x] </li></ul>|將User下的LikePosts和LikeComments取消|Must Have| 在Comment&Post中增加 Likers field| Richard | 26 Dec 2019 |
+|<ul><li>- [x] </li></ul>|刪除AuthorGender&AuthorDomain|Must Have| 用Population的方式來取代 | Richard | 26 Dec 2019 |
+
+|<ul><li>- [x] </li></ul>|User migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Report migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Post migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Comment migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
+|<ul><li>- [ ] </li></ul>|測試Primitive.ObjectID對接時候是可否可以轉成String|Must Have| 若無法則須新增另一Struct | Richard | 26 Dec 2019 |
 
 
 
