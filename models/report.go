@@ -12,6 +12,10 @@ import (
 
 )
 
+// 回傳Report時, 需要Populate什麼
+// Author
+// ReportID
+
 type Report struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	Content      string             `json:"content" bson:"content"`
@@ -82,4 +86,124 @@ func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*Repo
 	}
 
 	return reports, nil
+}
+
+func FindReportsForPreview(skip int, limit int) ([]*Report, error) {
+	// This will return the report sort by createdAt
+	var reports []*Report
+
+	pipeline := []bson.M{
+
+		// Populate Author
+		bson.M{
+			"$lookup": bson.M{
+				"from": "user",
+				"let":  bson.M{"author": "$author"},
+				"pipeline": bson.A{
+					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
+					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
+				},
+				"as": "author",
+			},
+		},
+
+		bson.M{
+			"$project": bson.M{
+				"reportTarget": 1,
+				"PreviewText":  1,
+				"PreviewPhoto": 1,
+				"author":       1,
+				"solve":        1,
+				"createdAt":    1,
+				"_id":          1,
+			},
+		},
+		// Sort by createdAt
+		// Old one go higher
+		bson.M{
+			"$sort": bson.M{"createdAt": 1},
+		},
+	}
+
+	if skip > 0 {
+		pipeline = append(pipeline, bson.M{
+			"$skip": skip,
+		})
+	}
+
+	if limit > 0 {
+		pipeline = append(pipeline, bson.M{
+			"$limit": limit,
+		})
+	}
+
+	result, err := database.ReportCollection.Aggregate(context.TODO(), pipeline)
+	defer result.Close(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = result.All(context.TODO(), &reports)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reports, nil
+}
+
+func FindSingleReport(rOID primitive.ObjectID) (*Report, error) {
+	// This will return the report sort by createdAt
+	var reports []*Report
+
+	pipeline := []bson.M{
+		// Find match
+
+		bson.M{
+			"$match": bson.M{
+				"_id": rOID,
+			},
+		},
+		// Populate Author
+		bson.M{
+			"$lookup": bson.M{
+				"from": "user",
+				"let":  bson.M{"author": "$author"},
+				"pipeline": bson.A{
+					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
+					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
+				},
+				"as": "author",
+			},
+		},
+		// Sort by createdAt
+		// Old one go higher
+		bson.M{
+			"$project": bson.M{
+				"reportTarget": 1,
+				"content":      1,
+				"author":       1,
+				"solve":        1,
+				"createdAt":    1,
+				"reportId":     1,
+				"_id":          1,
+			},
+		},
+	}
+
+	result, err := database.ReportCollection.Aggregate(context.TODO(), pipeline)
+	defer result.Close(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = result.All(context.TODO(), &reports)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reports[0], nil
 }

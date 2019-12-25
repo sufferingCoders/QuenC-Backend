@@ -5,6 +5,7 @@ import (
 	"net/smtp"
 	"os"
 	"quenc/database"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -25,13 +26,11 @@ type User struct {
 	Role          int                `json:"role" bson:"role"`
 	Gender        int                `json:"gender" bson:"gender"`
 	EmailVerified bool               `json:"emailVerified" bson:"emailVerified"`
-	LastSeen      primitive.DateTime `json:"lastSeen" bson:"lastSeen"`
-	Dob           primitive.DateTime `json:"dob" bson:"dob"`
-	CreatedAt     primitive.DateTime `json:"createdAt" bson:"createdAt"`
+	LastSeen      time.Time          `json:"lastSeen" bson:"lastSeen"`
+	Dob           time.Time          `json:"dob" bson:"dob"`
+	CreatedAt     time.Time          `json:"createdAt" bson:"createdAt"`
 	ChatRooms     []string           `json:"chatRooms" bson:"chatRooms"`
 	Friends       []string           `json:"friends" bson:"friends"`
-	LikePosts     []string           `json:"likePosts" bson:"likePosts"`
-	LikeComments  []string           `json:"likeComments" bson:"likeComments"`
 	SavedPosts    []string           `json:"savedPosts" bson:"savedPosts"`
 }
 

@@ -81,9 +81,7 @@ func UpdateReport(c *gin.Context) {
 	}
 
 	delete(updateFields, "_id")
-	delete(updateFields, "authorGender")
 	delete(updateFields, "author")
-	delete(updateFields, "authorDomain")
 	delete(updateFields, "createdAt")
 
 	result, err = models.UpdateReportByOID(*rOID, updateFields)

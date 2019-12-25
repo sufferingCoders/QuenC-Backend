@@ -82,13 +82,11 @@ func SingupUser(c *gin.Context) {
 		Role:          1,
 		Gender:        -1,
 		EmailVerified: false,
-		LastSeen:      primitive.NewDateTimeFromTime(time.Now()),
-		Dob:           primitive.NewDateTimeFromTime(time.Now()),
-		CreatedAt:     primitive.NewDateTimeFromTime(time.Now()),
+		Dob:           time.Now(),
+		LastSeen:      time.Now(),
+		CreatedAt:     time.Now(),
 		ChatRooms:     []string{},
 		Friends:       []string{},
-		LikePosts:     []string{},
-		LikeComments:  []string{},
 		SavedPosts:    []string{},
 	}
 

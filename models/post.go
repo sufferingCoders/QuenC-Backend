@@ -156,3 +156,191 @@ func FindPostByAuthor(uOID primitive.ObjectID, findOptions *options.FindOptions)
 	posts, err := FindPosts(bson.M{"author": uOID}, findOptions)
 	return posts, err
 }
+
+func FinPostsForPreview(skip int, limit int, sortByLikeCount bool) ([]*Post, error) {
+	var posts []*Post
+
+	pipeline := []bson.M{
+		// Populate Author
+		bson.M{
+			"$lookup": bson.M{
+				"from": "user",
+				"let":  bson.M{"author": "$author", "anonymous": "$anonymous"},
+				"pipeline": bson.A{
+					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
+					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
+				},
+				"as": "author",
+			},
+		},
+		// Populate Category
+		bson.M{
+			"$lookup": bson.M{
+				"from": "postCategory",
+				"let":  bson.M{"category": "$category"},
+				"pipeline": bson.A{
+					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$category"}}}},
+					bson.M{"$project": bson.M{"categoryName1": 1, "_id": 1}},
+				},
+				"as": "category",
+			},
+		},
+		// Project
+		bson.M{
+			"$project": bson.M{
+				"_id":          1,
+				"likeCount":    bson.M{"$size": "$likers"},
+				"author":       bson.M{"$arrayElemAt": bson.A{"$author", 0}},
+				"category":     bson.M{"$arrayElemAt": bson.A{"$category", 0}},
+				"previewText":  1,
+				"title":        1,
+				"previewPhoto": 1,
+				"createdAt":    1,
+			},
+		},
+		// Sorting
+		bson.M{
+			"$sort": bson.M{"createdAt": -1},
+		},
+	}
+
+	if sortByLikeCount {
+		pipeline = append(pipeline, bson.M{
+			"$sort": bson.M{
+				"$sort": -1,
+			},
+		})
+	}
+
+	if skip > 0 {
+		pipeline = append(pipeline, bson.M{
+			"$skip": skip,
+		})
+	}
+
+	if limit > 0 {
+		pipeline = append(pipeline, bson.M{
+			"$limit": limit,
+		})
+	}
+
+	// pipeline_2 := mongo.Pipeline{
+	// 	bson.D{{
+	// 		"$lookup", bson.D{
+	// 			{"from", "user"},
+	// 			{"let", bson.M{"author": "$author", "anonymous": "$anonymous"}},
+	// 			{"pipeline", bson.A{
+	// 				bson.D{
+	// 					{"$match", bson.M{
+	// 						"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}},
+	// 					}},
+	// 					{"$project", bson.D{
+	// 						{"_id", 1},
+	// 						{"gender", 1},
+	// 						{"domain", bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}},
+	// 					}},
+	// 				},
+	// 			}},
+	// 			{"as", "author"},
+	// 		},
+	// 	}},
+	// }
+
+	// pipeline_2 := mongo.Pipeline{bson.D{{
+	// 	"from": "user",
+	// 	"let":  {"author": "$author", "anonymous": "$anonymous"},
+	// 	"pipeline": bson.A{
+	// 		{"$match": {"$expr": {"$eq": bson.A{"$_id", "$$author"}}}},
+	// 		{"$project": {"_id": 1, "gender": 1, "domain": {"$cond": {"if": {"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
+	// 	},
+	// 	"as": "author",
+	// }}}
+
+	result, err := database.PostCollection.Aggregate(context.TODO(), pipeline)
+
+	defer result.Close(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = result.All(context.TODO(), &posts)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+
+}
+
+func FindSinglePost(pOID primitive.ObjectID) (*Post, error) {
+	var posts []*Post
+
+	pipeline := []bson.M{
+
+		// Find the match one
+
+		bson.M{
+			"$match": bson.M{
+				"_id": pOID,
+			},
+		},
+		// Populate Author
+		bson.M{
+			"$lookup": bson.M{
+				"from": "user",
+				"let":  bson.M{"author": "$author", "anonymous": "$anonymous"},
+				"pipeline": bson.A{
+					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
+					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
+				},
+				"as": "author",
+			},
+		},
+		// Populate Category
+		bson.M{
+			"$lookup": bson.M{
+				"from": "postCategory",
+				"let":  bson.M{"category": "$category"},
+				"pipeline": bson.A{
+					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$category"}}}},
+					bson.M{"$project": bson.M{"categoryName1": 1, "_id": 1}},
+				},
+				"as": "category",
+			},
+		},
+		// Project
+		bson.M{
+			"$project": bson.M{
+				"_id":       1,
+				"likeCount": bson.M{"$size": "$likers"},
+				"author":    bson.M{"$arrayElemAt": bson.A{"$author", 0}},
+				"category":  bson.M{"$arrayElemAt": bson.A{"$category", 0}},
+				"title":     1,
+				"content":   1,
+				"createdAt": 1,
+				"updatedAt": 1,
+			},
+		},
+		// Sorting
+
+	}
+
+	result, err := database.PostCollection.Aggregate(context.TODO(), pipeline)
+
+	defer result.Close(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = result.All(context.TODO(), &posts)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return posts[0], nil
+
+}

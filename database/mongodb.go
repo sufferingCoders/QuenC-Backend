@@ -45,9 +45,9 @@ func InitDB() {
 	DB = client.Database("quenc")
 
 	PostCategoryCollection = DB.Collection("postCategory")
-	CommentCollection = DB.Collection("Comment")
-	PostCollection = DB.Collection("Post")
-	ReportCollection = DB.Collection("Report")
-	UserCollection = DB.Collection("User")
+	CommentCollection = DB.Collection("comment")
+	PostCollection = DB.Collection("post")
+	ReportCollection = DB.Collection("report")
+	UserCollection = DB.Collection("user")
 
 }
