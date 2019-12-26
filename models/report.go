@@ -88,12 +88,23 @@ func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*Repo
 	return reports, nil
 }
 
-func FindReportsForPreview(skip int, limit int) ([]*Report, error) {
+func FindAllReporstWithPreview(skip int, limit int) ([]*Report, error) {
+	reports, err := FindReportsWithPreview(nil, skip, limit)
+	return reports, err
+}
+
+func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*Report, error) {
 	// This will return the report sort by createdAt
 	var reports []*Report
 
-	pipeline := []bson.M{
+	var pipeline = []bson.M{}
 
+	if matchingCond != nil {
+		// Find match
+		pipeline = append(pipeline, *matchingCond...)
+	}
+
+	pipeline = append(pipeline, []bson.M{
 		// Populate Author
 		bson.M{
 			"$lookup": bson.M{
@@ -123,7 +134,7 @@ func FindReportsForPreview(skip int, limit int) ([]*Report, error) {
 		bson.M{
 			"$sort": bson.M{"createdAt": 1},
 		},
-	}
+	}...)
 
 	if skip > 0 {
 		pipeline = append(pipeline, bson.M{
@@ -153,18 +164,24 @@ func FindReportsForPreview(skip int, limit int) ([]*Report, error) {
 	return reports, nil
 }
 
-func FindSingleReport(rOID primitive.ObjectID) (*Report, error) {
+func FindSingleReportWithDetail(rOID primitive.ObjectID) (*Report, error) {
+	reports, err := FindReportWithDetail(&[]bson.M{bson.M{"$match": bson.M{"_id": rOID}}})
+	return reports[0], err
+}
+
+func FindReportWithDetail(matchingCond *[]bson.M) ([]*Report, error) {
 	// This will return the report sort by createdAt
 	var reports []*Report
 
-	pipeline := []bson.M{
-		// Find match
+	var pipeline = []bson.M{}
 
-		bson.M{
-			"$match": bson.M{
-				"_id": rOID,
-			},
-		},
+	if matchingCond != nil {
+		// Find match
+		pipeline = append(pipeline, *matchingCond...)
+	}
+
+	pipeline = append(pipeline, []bson.M{
+
 		// Populate Author
 		bson.M{
 			"$lookup": bson.M{
@@ -190,7 +207,7 @@ func FindSingleReport(rOID primitive.ObjectID) (*Report, error) {
 				"_id":          1,
 			},
 		},
-	}
+	}...)
 
 	result, err := database.ReportCollection.Aggregate(context.TODO(), pipeline)
 	defer result.Close(context.TODO())
@@ -205,5 +222,5 @@ func FindSingleReport(rOID primitive.ObjectID) (*Report, error) {
 		return nil, err
 	}
 
-	return reports[0], nil
+	return reports, nil
 }

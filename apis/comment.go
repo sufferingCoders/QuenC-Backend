@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"quenc/models"
 	"quenc/utils"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -157,13 +158,19 @@ func FindCommentsByPost(c *gin.Context) {
 		return
 	}
 
-	findOption := options.Find()
-	err := utils.SetupFindOptions(findOption, c)
+	skip, limit, sort, err := utils.GetSkipLimitSortFromContext(c)
 	if err != nil {
 		return
 	}
 
-	comments, err := models.FindCommentByPost(*pOID, findOption)
+	var sortByLikeCount bool
+	if strings.ToLower(*sort) == "likecount" {
+		sortByLikeCount = true
+	} else {
+		sortByLikeCount = false
+	}
+
+	comments, err := models.FindCommentsWithDetailForPost(*pOID, *skip, *limit, sortByLikeCount)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the Comment: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -183,7 +190,7 @@ func FindCommentById(c *gin.Context) {
 		return
 	}
 
-	comment, err := models.FindCommentByOID(*cOID)
+	comment, err := models.GetSingleCommentWithDetail(*cOID)
 
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot find the commennt: %+v", err)

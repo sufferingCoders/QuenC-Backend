@@ -154,15 +154,44 @@ func DeletePost(c *gin.Context) {
 	})
 }
 
-func FindAllPost(c *gin.Context) {
+func FindAllPostWithCategory(c *gin.Context) {
 
-	findOption := options.Find()
-	err := utils.SetupFindOptions(findOption, c)
+	// findOption := options.Find()
+	// err := utils.SetupFindOptions(findOption, c)
+
+	// if err != nil {
+	// 	return
+	// }
+
+	var cOID *primitive.ObjectID
+
+	cid := c.Param("cid")
+
+	if cid == "all" || cid == "" {
+		cOID = nil
+	} else {
+		cOID = utils.GetOID(cid, c)
+		if cOID == nil {
+			return
+		}
+	}
+
+	skip, limit, sort, err := utils.GetSkipLimitSortFromContext(c)
 
 	if err != nil {
 		return
 	}
-	posts, err := models.FindPosts(bson.M{}, findOption)
+
+	var sortByLikeCount bool
+	if strings.ToLower(*sort) == "likecount" {
+		sortByLikeCount = true
+	} else {
+		sortByLikeCount = false
+	}
+
+	posts, err := models.FindAllCategoryPostsWithPreview(cOID, *skip, *limit, sortByLikeCount)
+
+	// posts, err := models.FindPosts(bson.M{}, findOption)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the posts: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -182,7 +211,7 @@ func FindPostById(c *gin.Context) {
 	if pOID == nil {
 		return
 	}
-	post, err := models.FindPostByOID(*pOID)
+	post, err := models.FindSinglePostWithDetail(*pOID)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the post: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -209,7 +238,7 @@ func FindPostByAuthor(c *gin.Context) {
 		return
 	}
 
-	posts, err := models.FindPostByAuthor(*aOID, findOption)
+	posts, err := models.FindPostsWithPreview(&[]bson.M{bson.M{"$match": bson.M{"author": aOID}}}, -1, -1, false)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the post: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -242,8 +271,9 @@ func FindSavedPost(c *gin.Context) {
 
 		savedOIDs = append(savedOIDs, oid)
 	}
+	posts, err := models.FindPostsWithPreview(&[]bson.M{bson.M{"_id": bson.M{"$in": savedOIDs}}}, -1, -1, false)
 
-	posts, err := models.FindPosts(bson.M{"_id": bson.M{"$in": savedOIDs}}, findOption)
+	// posts, err := models.FindPosts(bson.M{"_id": bson.M{"$in": savedOIDs}}, findOption)
 
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot find the SavedPosts: %+v", err)
@@ -278,8 +308,8 @@ func FindArrayOfPosts(c *gin.Context) {
 	utils.SetupFindOptions(findOption, c)
 
 	// makin the save post to ObjectID
-
-	posts, err := models.FindPosts(bson.M{"_id": bson.M{"$in": postsOID}}, findOption)
+	posts, err := models.FindPostsWithPreview(&[]bson.M{bson.M{"_id": bson.M{"$in": postsOID}}}, -1, -1, false)
+	// posts, err := models.FindPosts(}, findOption)
 
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot find the posts : %+v", err)

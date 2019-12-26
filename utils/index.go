@@ -138,4 +138,41 @@ func GetDomainFromEmail(email string) string {
 	return emailParts[1]
 }
 
+func GetSkipLimitSortFromContext(c *gin.Context) (*int, *int, *string, error) {
+	skipStr := c.Query("skip")
+	limitStr := c.Query("limit")
+	skip, err := strconv.Atoi(skipStr)
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot convert the given skip: %+v", err)
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest, gin.H{
+				"err":     errStr,
+				"skipStr": skipStr,
+			},
+		)
+		return nil, nil, nil, err
 
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot convert the given limit: %+v", err)
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest, gin.H{
+				"err":      errStr,
+				"limitStr": limitStr,
+			},
+		)
+		return nil, nil, nil, err
+	}
+
+	var sort *string
+	sortStr := c.Query("sort")
+	if strings.TrimSpace(sortStr) == "" {
+		sort = nil
+	} else {
+		sort = &sortStr
+	}
+
+	return &skip, &limit, sort, nil
+}

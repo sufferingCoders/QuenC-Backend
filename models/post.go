@@ -157,10 +157,29 @@ func FindPostByAuthor(uOID primitive.ObjectID, findOptions *options.FindOptions)
 	return posts, err
 }
 
-func FinPostsForPreview(skip int, limit int, sortByLikeCount bool) ([]*Post, error) {
+func FindAllCategoryPostsWithPreview(cOID *primitive.ObjectID, skip int, limit int, sortByLikeCount bool) ([]*Post, error) {
+	cond := []bson.M{}
+	if cOID != nil {
+		cond = append(cond, bson.M{"$match": bson.M{"category": cOID}})
+	} else {
+		cond = nil
+	}
+
+	posts, err := FindPostsWithPreview(&cond, skip, limit, sortByLikeCount)
+	return posts, err
+}
+
+func FindPostsWithPreview(matchingCond *[]bson.M, skip int, limit int, sortByLikeCount bool) ([]*Post, error) {
 	var posts []*Post
 
-	pipeline := []bson.M{
+	var pipeline = []bson.M{}
+
+	if matchingCond != nil {
+		// Find match
+		pipeline = append(pipeline, *matchingCond...)
+	}
+
+	pipeline = append(pipeline, []bson.M{
 		// Populate Author
 		bson.M{
 			"$lookup": bson.M{
@@ -202,7 +221,7 @@ func FinPostsForPreview(skip int, limit int, sortByLikeCount bool) ([]*Post, err
 		bson.M{
 			"$sort": bson.M{"createdAt": -1},
 		},
-	}
+	}...)
 
 	if sortByLikeCount {
 		pipeline = append(pipeline, bson.M{
@@ -224,38 +243,6 @@ func FinPostsForPreview(skip int, limit int, sortByLikeCount bool) ([]*Post, err
 		})
 	}
 
-	// pipeline_2 := mongo.Pipeline{
-	// 	bson.D{{
-	// 		"$lookup", bson.D{
-	// 			{"from", "user"},
-	// 			{"let", bson.M{"author": "$author", "anonymous": "$anonymous"}},
-	// 			{"pipeline", bson.A{
-	// 				bson.D{
-	// 					{"$match", bson.M{
-	// 						"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}},
-	// 					}},
-	// 					{"$project", bson.D{
-	// 						{"_id", 1},
-	// 						{"gender", 1},
-	// 						{"domain", bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}},
-	// 					}},
-	// 				},
-	// 			}},
-	// 			{"as", "author"},
-	// 		},
-	// 	}},
-	// }
-
-	// pipeline_2 := mongo.Pipeline{bson.D{{
-	// 	"from": "user",
-	// 	"let":  {"author": "$author", "anonymous": "$anonymous"},
-	// 	"pipeline": bson.A{
-	// 		{"$match": {"$expr": {"$eq": bson.A{"$_id", "$$author"}}}},
-	// 		{"$project": {"_id": 1, "gender": 1, "domain": {"$cond": {"if": {"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
-	// 	},
-	// 	"as": "author",
-	// }}}
-
 	result, err := database.PostCollection.Aggregate(context.TODO(), pipeline)
 
 	defer result.Close(context.TODO())
@@ -274,18 +261,29 @@ func FinPostsForPreview(skip int, limit int, sortByLikeCount bool) ([]*Post, err
 
 }
 
-func FindSinglePost(pOID primitive.ObjectID) (*Post, error) {
+func FindSinglePostWithDetail(pOID primitive.ObjectID) (*Post, error) {
+
+	posts, err := FindPostWithDetail(&[]bson.M{
+		bson.M{"$match": bson.M{
+			"_id": pOID,
+		}},
+	})
+
+	return posts[0], err
+}
+
+func FindPostWithDetail(matchingCond *[]bson.M) ([]*Post, error) {
 	var posts []*Post
 
-	pipeline := []bson.M{
+	var pipeline = []bson.M{}
 
-		// Find the match one
+	if matchingCond != nil {
+		// Find match
+		pipeline = append(pipeline, *matchingCond...)
+	}
 
-		bson.M{
-			"$match": bson.M{
-				"_id": pOID,
-			},
-		},
+	pipeline = append(pipeline, []bson.M{
+
 		// Populate Author
 		bson.M{
 			"$lookup": bson.M{
@@ -325,7 +323,7 @@ func FindSinglePost(pOID primitive.ObjectID) (*Post, error) {
 		},
 		// Sorting
 
-	}
+	}...)
 
 	result, err := database.PostCollection.Aggregate(context.TODO(), pipeline)
 
@@ -341,6 +339,6 @@ func FindSinglePost(pOID primitive.ObjectID) (*Post, error) {
 		return nil, err
 	}
 
-	return posts[0], nil
+	return posts, nil
 
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"quenc/models"
 	"quenc/utils"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -146,4 +147,77 @@ func FindAllReports(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"reports": reports,
 	})
+}
+
+// Admin Middleware
+func FindSingleReport(c *gin.Context) {
+	rid := c.Param("rid")
+
+	rOID := utils.GetOID(rid, c)
+	if rOID == nil {
+		return
+	}
+
+	report, err := models.FindSingleReportWithDetail(*rOID)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot find the rsport: %+v", err)
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"err": errStr,
+				"rid": rid,
+			},
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"report": report,
+	})
+}
+
+// Admin Middleware
+
+func FindReportsForPreview(c *gin.Context) {
+
+	skipStr := c.Query("skip")
+	limitStr := c.Query("limit")
+	skip, err := strconv.Atoi(skipStr)
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot convert the given skip: %+v", err)
+		c.JSON(
+			http.StatusBadRequest, gin.H{
+				"err":     errStr,
+				"skipStr": skipStr,
+			},
+		)
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot convert the given limit: %+v", err)
+		c.JSON(
+			http.StatusBadRequest, gin.H{
+				"err":      errStr,
+				"limitStr": limitStr,
+			},
+		)
+	}
+
+	reports, err := models.FindAllReporstWithPreview(skip, limit)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot fetch the reports: %+v", reports)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err":   errStr,
+			"limit": limit,
+			"skip":  skip,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"reports": reports,
+	})
+
 }
