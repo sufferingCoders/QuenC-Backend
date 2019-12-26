@@ -56,7 +56,8 @@
 |<ul><li>- [x] </li></ul>|Report migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Post migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Comment migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|Aggregation |Must Have| 為規劃的Aggregation Function加上Hander&Router| Richard | 26 Dec 2019 |
+|<ul><li>- [x] </li></ul>|Aggregation Complete |Must Have| 為規劃的Aggregation Function加上Hander&Router| Richard | 26 Dec 2019 |
+|<ul><li>- [ ] </li></ul>|前端API路徑修正|Must Have| 連接上新的Backend| Richard | 26 Dec 2019 |
 |<ul><li>- [ ] </li></ul>|測試Primitive.ObjectID對接時候是可否可以轉成String|Must Have| 若無法則須新增另一Struct | Richard | 26 Dec 2019 |
 
 
