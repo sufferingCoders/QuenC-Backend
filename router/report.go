@@ -12,7 +12,8 @@ func InitReportRouter(router *gin.Engine) {
 		reportRouter.POST("/", middlewares.UserAuth(), apis.AddComment)
 		reportRouter.PATCH("/:rid", middlewares.AdminAuth(), apis.UpdateReport)
 		reportRouter.DELETE("/:rid", middlewares.AdminAuth(), apis.DeleteReport)
-		reportRouter.GET("/", middlewares.AdminAuth(), apis.FindAllReports)
+		reportRouter.GET("/", middlewares.AdminAuth(), apis.FindReportsForPreview)
+		reportRouter.GET("/detail/:rid", middlewares.AdminAuth(), apis.FindSingleReport)
 	}
 
 }
