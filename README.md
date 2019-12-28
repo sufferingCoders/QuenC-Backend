@@ -464,3 +464,26 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 
 
 
+# 滿滿的坑
+
+## ( 讀取HTML Templates 時 ) invalid memory address or nil pointer dereference
+
+當跑
+
+```go
+	c.HTML(http.StatusOK, "EmailVerificationSuccessful.tmpl", gin.H{
+		"email": user.Email,
+	})
+```
+
+的時候出現 `invalid memory address or nil pointer dereference` 的訊息
+
+問題是在於:
+
+沒有導入HTML
+
+在router/index.go中
+```go
+	router := gin.Default()
+	router.LoadHTMLGlob("templates/*") // 由此項導入 HTML
+```
