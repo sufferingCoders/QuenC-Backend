@@ -75,6 +75,7 @@ func UpdateComment(c *gin.Context) {
 	delete(updateFields, "_id")
 	delete(updateFields, "createdAt")
 	delete(updateFields, "author")
+	delete(updateFields, "updatedAt")
 
 	// Only Admin and Author can update the Comment
 	cOID := utils.GetOID(cid, c)
@@ -82,6 +83,7 @@ func UpdateComment(c *gin.Context) {
 		return
 	}
 
+	updateFields["updatedAt"] = time.Now()
 	result, err = models.UpdateCommentByOID(*cOID, updateFields)
 
 	if err != nil {

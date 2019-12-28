@@ -139,31 +139,42 @@ func GetDomainFromEmail(email string) string {
 }
 
 func GetSkipLimitSortFromContext(c *gin.Context) (*int, *int, *string, error) {
+	var skip int
+	var limit int
+	var err error
 	skipStr := c.Query("skip")
 	limitStr := c.Query("limit")
-	skip, err := strconv.Atoi(skipStr)
-	if err != nil {
-		errStr := fmt.Sprintf("Cannot convert the given skip: %+v", err)
-		c.AbortWithStatusJSON(
-			http.StatusBadRequest, gin.H{
-				"err":     errStr,
-				"skipStr": skipStr,
-			},
-		)
-		return nil, nil, nil, err
+	if strings.TrimSpace(skipStr) != "" {
+		skip, err = strconv.Atoi(skipStr)
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot convert the given skip: %+v", err)
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest, gin.H{
+					"err":     errStr,
+					"skipStr": skipStr,
+				},
+			)
+			return nil, nil, nil, err
 
+		}
+	} else {
+		skip = -1
 	}
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		errStr := fmt.Sprintf("Cannot convert the given limit: %+v", err)
-		c.AbortWithStatusJSON(
-			http.StatusBadRequest, gin.H{
-				"err":      errStr,
-				"limitStr": limitStr,
-			},
-		)
-		return nil, nil, nil, err
+	if strings.TrimSpace(skipStr) != "" {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot convert the given limit: %+v", err)
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest, gin.H{
+					"err":      errStr,
+					"limitStr": limitStr,
+				},
+			)
+			return nil, nil, nil, err
+		}
+	} else {
+		limit = -1
 	}
 
 	var sort *string
@@ -175,4 +186,34 @@ func GetSkipLimitSortFromContext(c *gin.Context) (*int, *int, *string, error) {
 	}
 
 	return &skip, &limit, sort, nil
+}
+
+func GetDisplayNameFromDomain(domain string) string {
+	var uni string
+
+	switch domain {
+	case "qut.edu.au":
+		uni = "昆士蘭理工"
+		break
+	case "uq.edu.au":
+		uni = "昆士蘭大學"
+		break
+	case "griffith.edu.au":
+		uni = "格里菲斯"
+		break
+	default:
+		uni = "UNKNOWN"
+	}
+
+	return uni
+}
+
+func CheckDomainValid(domain string) bool {
+	unis := []string{"qut.edu.au", "uq.edu.au", "griffith.edu.au"}
+	for _, u := range unis {
+		if u == domain {
+			return true
+		}
+	}
+	return false
 }

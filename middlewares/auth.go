@@ -10,6 +10,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
 )
 
 func UserAuth() gin.HandlerFunc {
@@ -32,7 +33,7 @@ func UserAuth() gin.HandlerFunc {
 		token, _ := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error":    "Invalid Token",
+					"err":      "Invalid Token",
 					"msg":      "Cannot parse the given token",
 					"token":    token,
 					"tokenStr": tokenStr,
@@ -60,8 +61,10 @@ func UserAuth() gin.HandlerFunc {
 		user, err := models.FindUserByOID(oid)
 
 		if err != nil {
+			errStr := fmt.Sprintf("Cannot find the user during authroization checking: %+v", err)
+
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"err":      err,
+				"err":      errStr,
 				"msg":      "Cannot find the user during authroization checking",
 				"token":    token,
 				"tokenStr": tokenStr,
@@ -110,7 +113,7 @@ func AdminAuth() gin.HandlerFunc {
 		token, _ := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error":    "Invalid Token",
+					"err":      "Invalid Token",
 					"msg":      "Cannot parse the given token",
 					"token":    token,
 					"tokenStr": tokenStr,

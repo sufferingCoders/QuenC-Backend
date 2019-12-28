@@ -70,7 +70,9 @@ func FindReportByOID(oid primitive.ObjectID) (*Report, error) {
 func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*Report, error) {
 	var reports []*Report
 	result, err := database.ReportCollection.Find(context.TODO(), filterDetail, findOptions)
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err
@@ -149,7 +151,9 @@ func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*Rep
 	}
 
 	result, err := database.ReportCollection.Aggregate(context.TODO(), pipeline)
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err
@@ -210,7 +214,9 @@ func FindReportWithDetail(matchingCond *[]bson.M) ([]*Report, error) {
 	}...)
 
 	result, err := database.ReportCollection.Aggregate(context.TODO(), pipeline)
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err

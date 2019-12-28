@@ -65,7 +65,9 @@ func FindCommentByOID(oid primitive.ObjectID) (*Comment, error) {
 func FindComments(filterDetail bson.M, findOptions *options.FindOptions) ([]*Comment, error) {
 	var comments []*Comment
 	result, err := database.CommentCollection.Find(context.TODO(), filterDetail, findOptions)
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err
@@ -165,7 +167,10 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 	}
 
 	result, err := database.CommentCollection.Aggregate(context.TODO(), pipeline)
-	defer result.Close(context.TODO())
+
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err
@@ -217,7 +222,9 @@ func GetSingleCommentWithDetail(cOID primitive.ObjectID) (*Comment, error) {
 	}
 
 	result, err := database.CommentCollection.Aggregate(context.TODO(), pipeline)
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err

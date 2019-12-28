@@ -70,7 +70,9 @@ func FindPostByOID(oid primitive.ObjectID) (*Post, error) {
 func FindPosts(filterDetail bson.M, findOptions *options.FindOptions) ([]*Post, error) {
 	var posts []*Post
 	result, err := database.PostCollection.Find(context.TODO(), filterDetail, findOptions)
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err
@@ -131,8 +133,11 @@ func FindPostsPreview() ([]*Post, error) {
 	}
 
 	result, err := database.PostCategoryCollection.Aggregate(context.TODO(), pipeline)
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
+
 	result.All(context.TODO(), &posts)
-	defer result.Close(context.TODO())
 
 	if err != nil {
 		return nil, err
@@ -244,9 +249,9 @@ func FindPostsWithPreview(matchingCond *[]bson.M, skip int, limit int, sortByLik
 	}
 
 	result, err := database.PostCollection.Aggregate(context.TODO(), pipeline)
-
-	defer result.Close(context.TODO())
-
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -326,8 +331,9 @@ func FindPostWithDetail(matchingCond *[]bson.M) ([]*Post, error) {
 	}...)
 
 	result, err := database.PostCollection.Aggregate(context.TODO(), pipeline)
-
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err

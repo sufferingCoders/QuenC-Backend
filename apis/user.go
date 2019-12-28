@@ -37,22 +37,25 @@ type UpdateUserInfo struct {
 }
 
 func SingupUser(c *gin.Context) {
+
+	// Hava to use the uni email
 	var singupInfo SingupInfo
 	err := c.ShouldBindJSON(&singupInfo)
 
 	// Create a User in the backend
 
 	if err != nil {
+		errStr := fmt.Sprint("Cannot bind the given signup info: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err": err,
+			"err": errStr,
 			"msg": "Cannot bind the given LoginInfo",
 		})
 		return
 	}
 
-	if foundUser, err := models.FindUserByEmail(singupInfo.Email); foundUser != nil || err != nil {
+	if foundUser, _ := models.FindUserByEmail(singupInfo.Email); foundUser != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err":        err,
+			"err":        "The email has been used",
 			"msg":        "The email has been used",
 			"singupInfo": singupInfo,
 			"foundUser":  foundUser,
@@ -63,8 +66,9 @@ func SingupUser(c *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(singupInfo.Password), bcrypt.DefaultCost)
 
 	if err != nil {
+		errStr := fmt.Sprint("Cannot has the password: %+v", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"err":        err,
+			"err":        errStr,
 			"msg":        "Cannot hash the Password",
 			"singupInfo": singupInfo,
 		})
@@ -73,8 +77,19 @@ func SingupUser(c *gin.Context) {
 
 	// Creating user here
 
+	userDomain := utils.GetDomainFromEmail(singupInfo.Email)
+
+	if valid := utils.CheckDomainValid(userDomain); !valid {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err":        "Please use supported email domain for registering",
+			"msg":        "Please use supported email domain for registering",
+			"singupInfo": singupInfo,
+		})
+		return
+	}
+
 	user := models.User{
-		Domain:        utils.GetDomainFromEmail(singupInfo.Email),
+		Domain:        userDomain,
 		Email:         singupInfo.Email,
 		Password:      string(hashedPassword),
 		PhotoURL:      "",
@@ -93,8 +108,9 @@ func SingupUser(c *gin.Context) {
 	InsertedID, err := models.AddUser(&user)
 
 	if err != nil {
+		errStr := fmt.Sprint("Unable to add the user to Database: %+v", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"err": err,
+			"err": errStr,
 			"msg": "Unable to add the user to Database",
 		})
 		return
@@ -106,8 +122,9 @@ func SingupUser(c *gin.Context) {
 	authToken, err := utils.GenerateAuthToken(user.ID.Hex())
 
 	if err != nil {
+		errStr := fmt.Sprint("Cannot Generate the Auth Token: %+v", err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"err":  err,
+			"err":  errStr,
 			"msg":  "Cannot Generate the Auth Token",
 			"user": user,
 		})
@@ -119,9 +136,10 @@ func SingupUser(c *gin.Context) {
 	err = models.SendingVerificationEmail(&user)
 
 	if err != nil {
+		errStr := fmt.Sprint("Cannot send the email to this account: %+v", err)
 		c.AbortWithStatusJSON(
 			http.StatusBadGateway, gin.H{
-				"err": err,
+				"err": errStr,
 				"msg": "Cannot send the email to this account",
 			},
 		)
@@ -153,9 +171,10 @@ func SendVerificationEmailForUser(c *gin.Context) {
 	err := models.SendingVerificationEmail(user)
 
 	if err != nil {
+		errStr := fmt.Sprintf("Cannot send the email to this account: %+v", err)
 		c.AbortWithStatusJSON(
 			http.StatusBadGateway, gin.H{
-				"err": err,
+				"err": errStr,
 				"msg": "Cannot send the email to this account",
 			},
 		)
@@ -176,7 +195,7 @@ func ActivateUserEmail(c *gin.Context) {
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot get ObjectID from Hex: %+v", err)
 		c.HTML(http.StatusBadRequest, "EmailVerificationFail.tmpl", gin.H{
-			"uid":   uid,
+			"email": uid,
 			"error": errStr,
 			"msg":   "無法找到此使用者",
 		})
@@ -186,7 +205,6 @@ func ActivateUserEmail(c *gin.Context) {
 	user, err := models.FindUserByOID(uOID)
 
 	if err != nil {
-
 		c.HTML(http.StatusBadRequest, "EmailVerificationFail.tmpl", gin.H{
 			"email": user.Email,
 			"error": err.Error,
@@ -219,8 +237,9 @@ func LoginUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&loginInfo)
 
 	if err != nil {
+		errStr := fmt.Sprintf("Cannot bind the given LoginInfo: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err": err,
+			"err": errStr,
 			"msg": "Cannot bind the given LoginInfo",
 		})
 		return
@@ -239,8 +258,9 @@ func LoginUser(c *gin.Context) {
 	user, err := models.CheckingTheAuth(loginInfo.Eamil, loginInfo.Password)
 
 	if err != nil {
+		errStr := fmt.Sprintf("Email or Passwrod is not correct: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err":       err,
+			"err":       errStr,
 			"msg":       "Email or Passwrod is not correct",
 			"loginInfo": loginInfo,
 		})
@@ -250,8 +270,10 @@ func LoginUser(c *gin.Context) {
 	authToken, err := utils.GenerateAuthToken(user.ID.Hex())
 
 	if err != nil {
+		errStr := fmt.Sprintf("Cannot generate auth token for this user: %+v", err)
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"err":  err,
+			"err":  errStr,
 			"msg":  "Cannot generate auth token for this user",
 			"user": user,
 		})
@@ -269,14 +291,17 @@ func UpdateUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&UpdateFields)
 
 	if err != nil {
+		errStr := fmt.Sprintf("Cannot bind the given data with UpdateUserInfo: %+v", err)
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"err": err,
+			"err": errStr,
 			"msg": "Cannot bind the given data with UpdateUserInfo",
 		})
 		return
 	}
 
 	if UpdateFields["password"] != nil {
+
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": "Using change-password node to change password",
 			"msg": "Using change-password node to change password",
@@ -296,10 +321,12 @@ func UpdateUser(c *gin.Context) {
 	fmt.Printf("error is %+v\n", err)
 
 	if err != nil {
+		errStr := fmt.Sprintf("Cannot update this user: %+v", err)
+
 		c.AbortWithStatusJSON(
 			http.StatusBadRequest,
 			gin.H{
-				"err":            err,
+				"err":            errStr,
 				"msg":            "Cannot update this user",
 				"user":           user,
 				"UpdateUserInfo": UpdateFields,

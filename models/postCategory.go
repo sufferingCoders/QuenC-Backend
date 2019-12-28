@@ -61,7 +61,9 @@ func FindPostCategoryByOID(oid primitive.ObjectID) (*PostCategory, error) {
 func FindPostCategorys(filterDetail bson.M, findOptions *options.FindOptions) ([]*PostCategory, error) {
 	var postCategorys []*PostCategory
 	result, err := database.PostCategoryCollection.Find(context.TODO(), filterDetail, findOptions)
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err

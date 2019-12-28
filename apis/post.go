@@ -67,6 +67,7 @@ func UpdatePost(c *gin.Context) {
 	delete(updateFields, "_id")
 	delete(updateFields, "createdAt")
 	delete(updateFields, "author")
+	delete(updateFields, "updatedAt")
 
 	if err = c.ShouldBind(&updateFields); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
@@ -89,6 +90,7 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
+	updateFields["updatedAt"] = time.Now()
 	if user.Role == 0 {
 		result, err = models.UpdatePostByOID(*pOID, updateFields)
 	} else {

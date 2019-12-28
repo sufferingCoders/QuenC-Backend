@@ -35,13 +35,12 @@ type User struct {
 }
 
 var ( // Changing to env variables
-	host                          = "smtp.gmail.com:587"
-	username                      = os.Getenv("EMAIL_SENDING_USERNAME")
-	password                      = os.Getenv("EMAIL_SENDING_PASSWORD")
+	// username                      = os.Getenv("EMAIL_SENDING_USERNAME")
+	// password                      = os.Getenv("EMAIL_SENDING_PASSWORD")
 	projectionForRemovingPassword = bson.D{
 		{"password", 0},
 	}
-	verificationBaseURL = "https://shopping-au.appspot.com/user/activate/"
+	verificationBaseURL = "http://192.168.1.135:8080/user/email/activate/"
 )
 
 func (u *User) IsAmin() bool {
@@ -91,8 +90,11 @@ func FindUserByOID(oid primitive.ObjectID) (*User, error) {
 func FindUserByEmail(email string) (*User, error) {
 	var user User
 
-	err := database.UserCollection.FindOne(context.TODO(), bson.M{"email": email},
-		options.FindOne().SetProjection(projectionForRemovingPassword)).Decode(&user)
+	options.FindOne().SetProjection(projectionForRemovingPassword)
+	err := database.UserCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
 
 	return &user, err
 }
@@ -102,7 +104,9 @@ func FindUsers(filterDetail bson.M) ([]*User, error) {
 	var users []*User
 	result, err := database.UserCollection.Find(context.TODO(), filterDetail,
 		options.Find().SetProjection(projectionForRemovingPassword))
-	defer result.Close(context.TODO())
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
 
 	if err != nil {
 		return nil, err
@@ -122,6 +126,9 @@ func FindUsers(filterDetail bson.M) ([]*User, error) {
 
 // SendingVerificationEmail - Sending Email Verification to a User
 func SendingVerificationEmail(user *User) error {
+	var host = "smtp.gmail.com:587"
+	var username = os.Getenv("EMAIL_SENDING_USERNAME")
+	var password = os.Getenv("EMAIL_SENDING_PASSWORD")
 	plainAuth := smtp.PlainAuth(host, username, password, "smtp.gmail.com")
 	to := []string{user.Email}
 	msg := []byte(

@@ -36,6 +36,7 @@ type TestInfo struct {
 // InitRouter -initialise all the routers
 func InitRouter() *gin.Engine {
 	router := gin.Default()
+	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(200, []string{"123", "321"})
