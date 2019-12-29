@@ -17,6 +17,7 @@
 - [如何取得你的IP](#如何取得你的IP)
 	- [Windows](#Windows)
 	- [MacOS](#MacOS)
+- [滿滿的坑](#滿滿的坑)
 	
 	
 
@@ -487,3 +488,10 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*") // 由此項導入 HTML
 ```
+
+
+## response.Write on hijacked connection from github.com/gin-gonic/gin.(*responseWriter).Write
+這是因為我們已經將 Get Request 升級為 Websocket, 不能再使用c.JSON去傳送HTTP訊息
+
+
+
