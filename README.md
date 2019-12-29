@@ -58,8 +58,20 @@
 |<ul><li>- [x] </li></ul>|Post migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Comment migrate to Aggregation|Must Have| 使用Aggregation和Pipeline來做排序和Pupolation | Richard | 26 Dec 2019 |
 |<ul><li>- [x] </li></ul>|Aggregation Complete |Must Have| 為規劃的Aggregation Function加上Hander&Router| Richard | 26 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|前端API路徑修正|Must Have| 連接上新的Backend| Richard | 26 Dec 2019 |
-|<ul><li>- [ ] </li></ul>|測試Primitive.ObjectID對接時候是可否可以轉成String|Must Have| 若無法則須新增另一Struct | Richard | 26 Dec 2019 |
+|<ul><li>- [x] </li></ul>| 測試 User 登入&註冊 |Must Have| 測試Flutter前端是否能順利和後端API連接候登入, 並拿到JWT | Richard | 30 Dec 2019 |
+|<ul><li>- [x] </li></ul>| 測試 UserStream |Must Have| 測試Flutter前端是否能順利經由後端監聽MongodDB中的UserStream| Richard | 30 Dec 2019 |
+|<ul><li>- [x] </li></ul>| 測試 PostCategory 新增 |Must Have| 測試PostCategory的新增功能 | Richard | 30 Dec 2019 |
+|<ul><li>- [ ] </li></ul>| 測試 PostCategory 刪除 |Must Have| 測試PostCategory的刪除功能 | Richard | |
+|<ul><li>- [x] </li></ul>| 測試 Post |Must Have| 測試Post的新增和編輯功能 | Richard | 30 Dec 2019 |
+|<ul><li>- [x] </li></ul>| 測試 Post GET |Must Have| 測試前端Flutter能請求到Post | Richard | 30 Dec 2019 |
+|<ul><li>- [ ] </li></ul>| 測試 Post 刪除 |Must Have| 測試Post的刪除功能 | Richard |  |
+|<ul><li>- [ ] </li></ul>| 測試 Comment 新增 |Must Have| 測試Comment的新增功能 | Richard | |
+|<ul><li>- [ ] </li></ul>| 測試 Comment 刪除 |Must Have| 測試Comment的刪除功能 | Richard | |
+|<ul><li>- [ ] </li></ul>| 測試 Report 新增 |Must Have| 測試Report的新增功能 | Richard | |
+|<ul><li>- [ ] </li></ul>| 測試 Report 編輯 |Must Have| 測試Report的編輯功能 | Richard | |
+|<ul><li>- [ ] </li></ul>| 測試 Report 刪除 |Must Have| 測試Report的刪除功能 | Richard | |
+|<ul><li>- [ ] </li></ul>|前端API路徑修正|Must Have| 連接上新的Backend | Richard |  |
+|<ul><li>- [x] </li></ul>|測試Primitive.ObjectID對接時候是可否可以轉成String|Must Have| 若無法則須新增另一Struct (可以轉為S) | Richard | 30 Dec 2019 |
 
 
 
