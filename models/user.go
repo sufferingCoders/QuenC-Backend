@@ -23,11 +23,11 @@ type User struct {
 	Password      string             `json:"password" bson:"password"`
 	PhotoURL      string             `json:"photoURL" bson:"photoURL"`
 	Major         string             `json:"major" bson:"major"`
+	Dob           string             `json:"dob" bson:"dob"`
 	Role          int                `json:"role" bson:"role"`
 	Gender        int                `json:"gender" bson:"gender"`
 	EmailVerified bool               `json:"emailVerified" bson:"emailVerified"`
 	LastSeen      time.Time          `json:"lastSeen" bson:"lastSeen"`
-	Dob           time.Time          `json:"dob" bson:"dob"`
 	CreatedAt     time.Time          `json:"createdAt" bson:"createdAt"`
 	ChatRooms     []string           `json:"chatRooms" bson:"chatRooms"`
 	Friends       []string           `json:"friends" bson:"friends"`
@@ -165,15 +165,21 @@ func CheckingTheAuth(email string, password string) (*User, error) {
 	return &user, nil
 }
 
-func WatchUser(pipeline *mongo.Pipeline, changeStreamOption *options.ChangeStreamOptions) (*mongo.ChangeStream, error) {
+func WatchUser(pipeline []bson.M, changeStreamOption *options.ChangeStreamOptions) (*mongo.ChangeStream, error) {
 	collectionStream, err := database.UserCollection.Watch(context.TODO(), pipeline, changeStreamOption)
 	return collectionStream, err
 }
 
 func WatchUserByOID(oid primitive.ObjectID) (*mongo.ChangeStream, error) {
-	pipeline := mongo.Pipeline{bson.D{{"$match", bson.D{{"fullDocument._id", oid}}}}}
+	// pipeline := mongo.Pipeline{bson.D{{"$match", bson.D{{"fullDocument._id", oid}}}}}
+	pipeline := []bson.M{
+		bson.M{
+			"$match": bson.M{"fullDocument._id": oid},
+		},
+	}
+
 	changeStreamOption := options.ChangeStream().SetFullDocument(options.UpdateLookup)
-	stream, err := WatchUser(&pipeline, changeStreamOption)
+	stream, err := WatchUser(pipeline, changeStreamOption)
 	return stream, err
 }
 

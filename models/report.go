@@ -16,7 +16,7 @@ import (
 // Author
 // ReportID
 
-type Report struct {
+type ReportAdding struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	Content      string             `json:"content" bson:"content"`
 	PreviewText  string             `json:"previewText" bson:"previewText"`
@@ -28,7 +28,26 @@ type Report struct {
 	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
 }
 
-func AddReport(inputReport *Report) (interface{}, error) {
+type ReportPreview struct {
+	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	PreviewText  string             `json:"previewText" bson:"previewText"`
+	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
+	ReportTarget int                `json:"reportTarget" bson:"reportTarget"`
+	Solve        bool               `json:"solve" bson:"solve"`
+	Author       User               `json:"author" bson:"author"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+}
+type ReportDetail struct {
+	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Content      string             `json:"content" bson:"content"`
+	ReportTarget int                `json:"reportTarget" bson:"reportTarget"`
+	Solve        bool               `json:"solve" bson:"solve"`
+	Author       User               `json:"author" bson:"author"`
+	ReportID     primitive.ObjectID `json:"reportId" bson:"reportId"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+}
+
+func AddReport(inputReport *ReportAdding) (interface{}, error) {
 
 	result, err := database.ReportCollection.InsertOne(context.TODO(), inputReport)
 
@@ -58,8 +77,8 @@ func DeleteReportByOID(oid primitive.ObjectID) error {
 }
 
 // FindReportByOID - Find Report by its OID
-func FindReportByOID(oid primitive.ObjectID) (*Report, error) {
-	var report Report
+func FindReportByOID(oid primitive.ObjectID) (*ReportAdding, error) {
+	var report ReportAdding
 
 	err := database.ReportCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&report)
 
@@ -67,8 +86,8 @@ func FindReportByOID(oid primitive.ObjectID) (*Report, error) {
 }
 
 // FindReports - Find Multiple Reports by filterDetail
-func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*Report, error) {
-	var reports []*Report
+func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*ReportAdding, error) {
+	var reports []*ReportAdding
 	result, err := database.ReportCollection.Find(context.TODO(), filterDetail, findOptions)
 	if result != nil {
 		defer result.Close(context.TODO())
@@ -79,7 +98,7 @@ func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*Repo
 	}
 
 	for result.Next(context.TODO()) {
-		var elem Report
+		var elem ReportAdding
 		err := result.Decode(&elem)
 		if err != nil {
 			return nil, err
@@ -90,14 +109,14 @@ func FindReports(filterDetail bson.M, findOptions *options.FindOptions) ([]*Repo
 	return reports, nil
 }
 
-func FindAllReporstWithPreview(skip int, limit int) ([]*Report, error) {
+func FindAllReporstWithPreview(skip int, limit int) ([]*ReportPreview, error) {
 	reports, err := FindReportsWithPreview(nil, skip, limit)
 	return reports, err
 }
 
-func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*Report, error) {
+func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*ReportPreview, error) {
 	// This will return the report sort by createdAt
-	var reports []*Report
+	var reports []*ReportPreview
 
 	var pipeline = []bson.M{}
 
@@ -168,14 +187,14 @@ func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*Rep
 	return reports, nil
 }
 
-func FindSingleReportWithDetail(rOID primitive.ObjectID) (*Report, error) {
+func FindSingleReportWithDetail(rOID primitive.ObjectID) (*ReportDetail, error) {
 	reports, err := FindReportWithDetail(&[]bson.M{bson.M{"$match": bson.M{"_id": rOID}}})
 	return reports[0], err
 }
 
-func FindReportWithDetail(matchingCond *[]bson.M) ([]*Report, error) {
+func FindReportWithDetail(matchingCond *[]bson.M) ([]*ReportDetail, error) {
 	// This will return the report sort by createdAt
-	var reports []*Report
+	var reports []*ReportDetail
 
 	var pipeline = []bson.M{}
 

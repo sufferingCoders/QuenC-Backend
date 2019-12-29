@@ -12,7 +12,7 @@ import (
 
 )
 
-type Comment struct {
+type CommentAdding struct {
 	ID         primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
 	BelongPost primitive.ObjectID   `json:"belongPost" bson:"belongPost"`
 	Author     primitive.ObjectID   `json:"author" bson:"author"`
@@ -22,8 +22,18 @@ type Comment struct {
 	CreatedAt  time.Time            `json:"createdAt" bson:"createdAt"`
 }
 
+type CommentDetail struct {
+	ID         primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	BelongPost primitive.ObjectID `json:"belongPost" bson:"belongPost"`
+	Author     User               `json:"author" bson:"author"`
+	Content    string             `json:"content" bson:"content"`
+	LikeCount  int                `json:"likeCount" bson:"likeCount"`
+	UpdatedAt  time.Time          `json:"updatedAt" bson:"updatedAt"`
+	CreatedAt  time.Time          `json:"createdAt" bson:"createdAt"`
+}
+
 // AddComment - Adding Comment to MongoDB
-func AddComment(inputComment *Comment) (interface{}, error) {
+func AddComment(inputComment *CommentAdding) (interface{}, error) {
 
 	result, err := database.CommentCollection.InsertOne(context.TODO(), inputComment)
 
@@ -53,8 +63,8 @@ func DeleteCommentByOID(oid primitive.ObjectID) error {
 }
 
 // FindCommentByOID - Find Comment by its OID
-func FindCommentByOID(oid primitive.ObjectID) (*Comment, error) {
-	var comment Comment
+func FindCommentByOID(oid primitive.ObjectID) (*CommentAdding, error) {
+	var comment CommentAdding
 
 	err := database.CommentCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&comment)
 
@@ -62,8 +72,8 @@ func FindCommentByOID(oid primitive.ObjectID) (*Comment, error) {
 }
 
 // FindComments - Find Multiple Comments by filterDetail
-func FindComments(filterDetail bson.M, findOptions *options.FindOptions) ([]*Comment, error) {
-	var comments []*Comment
+func FindComments(filterDetail bson.M, findOptions *options.FindOptions) ([]*CommentAdding, error) {
+	var comments []*CommentAdding
 	result, err := database.CommentCollection.Find(context.TODO(), filterDetail, findOptions)
 	if result != nil {
 		defer result.Close(context.TODO())
@@ -74,7 +84,7 @@ func FindComments(filterDetail bson.M, findOptions *options.FindOptions) ([]*Com
 	}
 
 	for result.Next(context.TODO()) {
-		var elem Comment
+		var elem CommentAdding
 		err := result.Decode(&elem)
 		if err != nil {
 			return nil, err
@@ -86,7 +96,7 @@ func FindComments(filterDetail bson.M, findOptions *options.FindOptions) ([]*Com
 }
 
 // FindCommentByPost - find Comments for certain post
-func FindCommentByPost(uOID primitive.ObjectID, findOptions *options.FindOptions) ([]*Comment, error) {
+func FindCommentByPost(uOID primitive.ObjectID, findOptions *options.FindOptions) ([]*CommentAdding, error) {
 	comments, err := FindComments(bson.M{"author": uOID}, findOptions)
 	return comments, err
 }
@@ -107,8 +117,8 @@ func ToggleLikerForComment(cOID primitive.ObjectID, uOID primitive.ObjectID, lik
 	return result, err
 }
 
-func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int, sortByLikeCount bool) ([]*Comment, error) {
-	var comments []*Comment
+func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int, sortByLikeCount bool) ([]*CommentAdding, error) {
+	var comments []*CommentAdding
 	pipeline := []bson.M{
 		bson.M{"$match": bson.M{
 			"belongPost": pOID,
@@ -137,6 +147,7 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 				"author":     bson.M{"$arrayElemAt": bson.A{"$author", 0}},
 				"content":    1,
 				"createdAt":  1,
+				"updatedAt":  1,
 			},
 		},
 
@@ -186,8 +197,8 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 
 }
 
-func GetSingleCommentWithDetail(cOID primitive.ObjectID) (*Comment, error) {
-	var comments []*Comment
+func GetSingleCommentWithDetail(cOID primitive.ObjectID) (*CommentAdding, error) {
+	var comments []*CommentAdding
 	pipeline := []bson.M{
 		bson.M{"$match": bson.M{
 			"_id": cOID,

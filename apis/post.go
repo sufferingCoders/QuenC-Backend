@@ -20,7 +20,7 @@ import (
 
 func AddPost(c *gin.Context) {
 
-	var post models.Post
+	var post models.PostAdding
 	var err error
 
 	if err = c.ShouldBindJSON(&post); err != nil {
@@ -38,6 +38,7 @@ func AddPost(c *gin.Context) {
 	post.Author = user.ID
 	post.CreatedAt = time.Now()
 	post.UpdatedAt = time.Now()
+	post.Likers = []primitive.ObjectID{}
 
 	InsertedID, err := models.AddPost(&post)
 	if err != nil {
@@ -89,7 +90,6 @@ func UpdatePost(c *gin.Context) {
 	if pOID == nil {
 		return
 	}
-
 	updateFields["updatedAt"] = time.Now()
 	if user.Role == 0 {
 		result, err = models.UpdatePostByOID(*pOID, updateFields)
@@ -199,6 +199,7 @@ func FindAllPostWithCategory(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

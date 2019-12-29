@@ -18,7 +18,7 @@ import (
 
 func AddComment(c *gin.Context) {
 
-	var comment models.Comment
+	var comment models.CommentAdding
 	var err error
 
 	if err = c.ShouldBindJSON(&comment); err != nil {
@@ -38,6 +38,7 @@ func AddComment(c *gin.Context) {
 	comment.Author = user.ID
 	comment.CreatedAt = time.Now()
 	comment.UpdatedAt = time.Now()
+	comment.Likers = []primitive.ObjectID{}
 
 	InsertedID, err := models.AddComment(&comment)
 	if err != nil {

@@ -12,18 +12,18 @@ import (
 
 )
 
-func AddPostCategory(c *gin.Context) {
-	var postCategory models.PostCategory
+type AddingCategoryInfo struct {
+	Name string `json:"name" bson:"name"`
+}
 
-	if err := c.ShouldBindJSON(&postCategory); err != nil {
+func AddPostCategory(c *gin.Context) {
+	var addingCategoryInfo AddingCategoryInfo
+
+	if err := c.ShouldBindJSON(&addingCategoryInfo); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": errStr,
 		})
-		return
-	}
-
-	if user := utils.GetUserFromContext(c); user == nil {
 		return
 	}
 
@@ -37,6 +37,10 @@ func AddPostCategory(c *gin.Context) {
 	// 	})
 	// 	return
 	// }
+
+	postCategory := models.PostCategory{
+		CategoryName: addingCategoryInfo.Name,
+	}
 
 	InsertedID, err := models.AddPostCategory(&postCategory)
 

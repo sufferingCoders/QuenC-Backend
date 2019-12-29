@@ -13,7 +13,7 @@ import (
 
 type PostCategory struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	CategoryName primitive.ObjectID `json:"categoryName" bson:"categoryName"`
+	CategoryName string             `json:"categoryName" bson:"categoryName"`
 }
 
 // AddPostCategory - Adding PostCategory to MongoDB

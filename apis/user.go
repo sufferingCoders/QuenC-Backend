@@ -97,7 +97,7 @@ func SingupUser(c *gin.Context) {
 		Role:          1,
 		Gender:        -1,
 		EmailVerified: false,
-		Dob:           time.Now(),
+		Dob:           "",
 		LastSeen:      time.Now(),
 		CreatedAt:     time.Now(),
 		ChatRooms:     []string{},
@@ -290,6 +290,18 @@ func UpdateUser(c *gin.Context) {
 	var UpdateFields map[string]interface{}
 	err := c.ShouldBindJSON(&UpdateFields)
 
+	if _, ok := UpdateFields["dob"]; ok {
+		_, err := time.Parse("2006-01-02 15:04:05.000Z", UpdateFields["dob"].(string))
+		if err != nil {
+			errStr := fmt.Sprint("The given DOB is not valid time %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+				"msg": "The given DOB is not valid time",
+			})
+			return
+		}
+	}
+
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot bind the given data with UpdateUserInfo: %+v", err)
 
@@ -396,18 +408,6 @@ func SubscribeUser(c *gin.Context) {
 		},
 	}
 
-	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
-
-	defer ws.Close()
-
-	if err != nil {
-		errStr := fmt.Sprintf("The websocket is not working due to the error: %+v \n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": errStr,
-		})
-		return
-	}
-
 	user := utils.GetUserFromContext(c)
 
 	if user == nil {
@@ -425,6 +425,18 @@ func SubscribeUser(c *gin.Context) {
 	}
 
 	defer stream.Close(context.TODO())
+
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+
+	defer ws.Close()
+
+	if err != nil {
+		errStr := fmt.Sprintf("The websocket is not working due to the error: %+v \n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errStr,
+		})
+		return
+	}
 
 	for {
 		ok := stream.Next(context.TODO())

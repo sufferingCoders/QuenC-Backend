@@ -17,7 +17,7 @@ import (
 
 // 若回傳nil 直接Return
 func AddReport(c *gin.Context) {
-	var report models.Report
+	var report models.ReportAdding
 	var err error
 
 	if err = c.ShouldBindJSON(&report); err != nil {
