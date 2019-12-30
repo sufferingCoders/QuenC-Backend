@@ -66,7 +66,7 @@
 |<ul><li>- [x] </li></ul>| 測試 Post GET |Must Have| 測試前端Flutter能請求到Post | Richard | 30 Dec 2019 |
 |<ul><li>- [ ] </li></ul>| 測試 Post 刪除 |Must Have| 測試Post的刪除功能 | Richard |  |
 |<ul><li>- [ ] </li></ul>| Post 字數限制 |Must Have| Post的字數限制, 顯示在編輯區 | Richard |  |
-
+|<ul><li>- [ ] </li></ul>| 壓縮上傳的圖片大小 |Must Have| 壓縮Firestore儲存的圖片大小 | Richard |  |
 |<ul><li>- [ ] </li></ul>| Post 載入失敗時, 一樣顯示排序 |Must Have| Post 載入失敗時, 一樣顯示排序 | Richard |  |
 |<ul><li>- [ ] </li></ul>| 測試 Comment 新增 |Must Have| 測試Comment的新增功能 | Richard | |
 |<ul><li>- [ ] </li></ul>| 測試 Comment 刪除 |Must Have| 測試Comment的刪除功能 | Richard | |
