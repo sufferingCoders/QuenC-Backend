@@ -78,6 +78,7 @@
 |<ul><li>- [ ] </li></ul>|兩個API節點對應Unsolved 跟 Solved Reports|Must Have| 兩個API節點對應Unsolved 跟 Solved | Richard |  |
 |<ul><li>- [ ] </li></ul>|LikeComment & LikePost |Must Have| 喜歡Comment/Post會同時將user加入likers和將Comment/Post加入User的Like清單 | Richard |  |
 |<ul><li>- [ ] </li></ul>|測試熱門&最新的Post&Comment排序|Must Have| 確認Post&Comment的熱門&最新能正常顯示 | Richard |  |
+|<ul><li>- [ ] </li></ul>|InitStart&InitEnd排序|Must Have| 用start & end來包覆init function | Richard |  |
 
 |<ul><li>- [x] </li></ul>|測試Primitive.ObjectID對接時候是可否可以轉成String|Must Have| 若無法則須新增另一Struct (可以轉為S) | Richard | 30 Dec 2019 |
 
