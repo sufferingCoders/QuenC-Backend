@@ -478,6 +478,16 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 偏好設定 > Network > Advanced > TCP/IP 中就有
 ![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/github_images/MacOS_IP.png?raw=true)
 
+# Image Compression 測試
+|Quality|Size|
+|:---:|:---:|
+| 100 | 5092852 |
+| 85 | 1309107 |
+| 70 | 684145 |
+| 50 | 407540 |
+| 40 | 327527 |
+| 30 | 260946 |
+| 20 | 199159 |
 
 
 # 滿滿的坑
