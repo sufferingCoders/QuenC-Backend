@@ -74,6 +74,8 @@
 |<ul><li>- [ ] </li></ul>| 測試 Report 編輯 |Must Have| 測試Report的編輯功能 | Richard | |
 |<ul><li>- [ ] </li></ul>| 測試 Report 刪除 |Must Have| 測試Report的刪除功能 | Richard | |
 |<ul><li>- [ ] </li></ul>|前端API路徑修正|Must Have| 連接上新的Backend | Richard |  |
+|<ul><li>- [ ] </li></ul>|將CompleteField簡化成toAddingMap|Must Have| CompleteField中止需要對特定的Field做更改 | Richard |  |
+
 |<ul><li>- [x] </li></ul>|測試Primitive.ObjectID對接時候是可否可以轉成String|Must Have| 若無法則須新增另一Struct (可以轉為S) | Richard | 30 Dec 2019 |
 
 
