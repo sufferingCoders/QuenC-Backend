@@ -77,6 +77,17 @@
 |<ul><li>- [x] </li></ul>|測試Primitive.ObjectID對接時候是可否可以轉成String|Must Have| 若無法則須新增另一Struct (可以轉為S) | Richard | 30 Dec 2019 |
 
 
+# Image Compression 測試
+|Quality|Size| Image |
+|:---:|:---:|:---:|
+| 100 | 5092852 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A28%3A16.231209.png?alt=media&token=20ce35f7-740a-4aaa-971b-39fe5414b41b)|
+| 85 | 1309107 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A29%3A48.089381.png?alt=media&token=d201dbff-64bd-4f83-94de-c9b59df81535)|
+| 70 | 684145 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A30%3A38.745708.png?alt=media&token=8b6928b6-e717-4bae-a17f-ce92a3f97a9f)|
+| 60 | 500781 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A32%3A01.220338.png?alt=media&token=e0dea274-1738-4cc9-820a-769a0b90e139)|
+| 50 | 407540 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A32%3A41.956861.png?alt=media&token=4bb39d06-229b-4a76-8c9e-27e96a4a0cd0)|
+| 40 | 327527 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A33%3A06.446733.png?alt=media&token=48a10bab-ad4e-4e0c-9914-3a4ba138f1a8)|
+| 30 | 260946 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A33%3A42.170038.png?alt=media&token=86db26a0-eb93-4564-9e4b-213b3d0eb600)|
+| 20 | 199159 |![圖片載入中...](https://firebasestorage.googleapis.com/v0/b/quenc-hlc.appspot.com/o/images%2F2019-12-30%2016%3A34%3A09.249090.png?alt=media&token=4025c6e9-53b9-4cf8-9e61-2fe077ec2d1a)|
 
 
 # Golang 資源
@@ -478,16 +489,6 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 偏好設定 > Network > Advanced > TCP/IP 中就有
 ![](https://github.com/sufferingCoders/QuenC-Backend/blob/master/github_images/MacOS_IP.png?raw=true)
 
-# Image Compression 測試
-|Quality|Size|
-|:---:|:---:|
-| 100 | 5092852 |
-| 85 | 1309107 |
-| 70 | 684145 |
-| 50 | 407540 |
-| 40 | 327527 |
-| 30 | 260946 |
-| 20 | 199159 |
 
 
 # 滿滿的坑
