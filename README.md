@@ -61,17 +61,17 @@
 |<ul><li>- [x] </li></ul>| 測試 User 登入&註冊 |Must Have| 測試Flutter前端是否能順利和後端API連接候登入, 並拿到JWT | Richard | 30 Dec 2019 |
 |<ul><li>- [x] </li></ul>| 測試 UserStream |Must Have| 測試Flutter前端是否能順利經由後端監聽MongodDB中的UserStream| Richard | 30 Dec 2019 |
 |<ul><li>- [x] </li></ul>| 測試 PostCategory 新增 |Must Have| 測試PostCategory的新增功能 | Richard | 30 Dec 2019 |
-|<ul><li>- [ ] </li></ul>| 測試 PostCategory 刪除 |Must Have| 測試PostCategory的刪除功能 | Richard | |
+|<ul><li>- [x] </li></ul>| 測試 PostCategory 刪除 |Must Have| 測試PostCategory的刪除功能 | Richard | |
 |<ul><li>- [x] </li></ul>| 測試 Post |Must Have| 測試Post的新增和編輯功能 | Richard | 30 Dec 2019 |
 |<ul><li>- [x] </li></ul>| 測試 Post GET |Must Have| 測試前端Flutter能請求到Post | Richard | 30 Dec 2019 |
-|<ul><li>- [ ] </li></ul>| 測試 Post 刪除 |Must Have| 測試Post的刪除功能 | Richard |  |
+|<ul><li>- [x] </li></ul>| 測試 Post 刪除 |Must Have| 測試Post的刪除功能 | Richard |  |
 |<ul><li>- [x] </li></ul>| Post 字數限制 |Must Have| Post的字數限制, 顯示在編輯區 | Richard | 30 Dec 2019  |
 |<ul><li>- [x] </li></ul>| 壓縮上傳的圖片大小 |Must Have| 壓縮Firestore儲存的圖片大小 | Richard | 30 Dec 2019  |
 |<ul><li>- [x] </li></ul>| Post 載入失敗時, 一樣顯示排序 |Must Have| Post 載入失敗時, 一樣顯示排序 | Richard | 30 Dec 2019  |
-|<ul><li>- [ ] </li></ul>| 測試 Comment 新增 |Must Have| 測試Comment的新增功能 | Richard | |
-|<ul><li>- [ ] </li></ul>| 測試 Comment 刪除 |Must Have| 測試Comment的刪除功能 | Richard | |
+|<ul><li>- [x] </li></ul>| 測試 Comment 新增 |Must Have| 測試Comment的新增功能 | Richard | |
+|<ul><li>- [x] </li></ul>| 測試 Comment 刪除 |Must Have| 測試Comment的刪除功能 | Richard | |
 |<ul><li>- [ ] </li></ul>| 測試 Report 新增 |Must Have| 測試Report的新增功能 | Richard | |
-|<ul><li>- [ ] </li></ul>| 測試 Report 編輯 |Must Have| 測試Report的編輯功能 | Richard | |
+|<ul><li>- [ ] </li></ul>| 測試 Report 編輯 |Must Have| 測試Report可以被標記為Solved | Richard | |
 |<ul><li>- [ ] </li></ul>| 測試 Report 刪除 |Must Have| 測試Report的刪除功能 | Richard | |
 |<ul><li>- [ ] </li></ul>|前端API路徑修正|Must Have| 連接上新的Backend | Richard |  |
 |<ul><li>- [ ] </li></ul>|將CompleteField簡化成toAddingMap|Must Have| CompleteField中止需要對特定的Field做更改 | Richard |  |
