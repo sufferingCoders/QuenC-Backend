@@ -119,17 +119,45 @@ func FindPosts(filterDetail bson.M, findOptions *options.FindOptions) ([]*PostAd
 
 func ToggleLikerForPost(pOID primitive.ObjectID, uOID primitive.ObjectID, like bool) (*mongo.UpdateResult, error) {
 	var pullOrPush string
+	var reverse string
+
 	if like {
 		pullOrPush = "$push"
+		reverse = "$pull"
+
 	} else {
 		pullOrPush = "$pull"
+		reverse = "$push"
+
 	}
 
-	result, err := database.PostCategoryCollection.UpdateOne(
+	_, err := database.UserCollection.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": uOID},
+		bson.M{pullOrPush: bson.M{"likePosts": pOID}},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := database.PostCollection.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": pOID},
 		bson.M{pullOrPush: bson.M{"likers": uOID}},
 	)
+
+	if err != nil {
+		// Reverse the Post one
+		_, err := database.UserCollection.UpdateOne(
+			context.TODO(),
+			bson.M{"_id": uOID},
+			bson.M{reverse: bson.M{"likePosts": pOID}},
+		)
+
+		return nil, err
+	}
+
 	return result, err
 }
 

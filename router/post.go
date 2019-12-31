@@ -10,7 +10,7 @@ func InitPostRouter(router *gin.Engine) {
 	postRouter := router.Group("/post")
 	{
 		postRouter.POST("/", middlewares.UserAuth(), apis.AddPost)
-		postRouter.PATCH("/like/:pid/:condition", middlewares.UserAuth(), apis.LikePost)
+		postRouter.PATCH("/like/:pid", middlewares.UserAuth(), apis.LikePost)
 		postRouter.PATCH("/detail/:pid", middlewares.UserAuth(), apis.UpdatePost)
 		postRouter.DELETE("/:pid", middlewares.UserAuth(), apis.DeletePost)
 		postRouter.GET("/category/:cid", apis.FindAllPostWithCategory) // cid = all, then we fetch all

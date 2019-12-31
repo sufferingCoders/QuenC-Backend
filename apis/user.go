@@ -100,9 +100,11 @@ func SingupUser(c *gin.Context) {
 		Dob:           "",
 		LastSeen:      time.Now(),
 		CreatedAt:     time.Now(),
-		ChatRooms:     []string{},
-		Friends:       []string{},
-		SavedPosts:    []string{},
+		LikePosts:     []primitive.ObjectID{},
+		LikeComments:  []primitive.ObjectID{},
+		ChatRooms:     []primitive.ObjectID{},
+		Friends:       []primitive.ObjectID{},
+		SavedPosts:    []primitive.ObjectID{},
 	}
 
 	InsertedID, err := models.AddUser(&user)

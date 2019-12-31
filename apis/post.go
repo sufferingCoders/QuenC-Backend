@@ -65,10 +65,7 @@ func UpdatePost(c *gin.Context) {
 
 	// Remove some fields so it can be modified
 
-	delete(updateFields, "_id")
-	delete(updateFields, "createdAt")
-	delete(updateFields, "author")
-	delete(updateFields, "updatedAt")
+	// if we have category fields, then convert it to ObjectID
 
 	if err = c.ShouldBind(&updateFields); err != nil {
 		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
@@ -80,6 +77,29 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 
+	if cStr, ok := updateFields["category"]; ok {
+
+		categoryOID, err := primitive.ObjectIDFromHex(cStr.(string))
+
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot get the category OID: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err":          errStr,
+				"updateFields": updateFields,
+				"pid":          pid,
+			})
+			return
+		}
+
+		updateFields["category"] = categoryOID
+
+	}
+
+	delete(updateFields, "_id")
+	delete(updateFields, "createdAt")
+	delete(updateFields, "author")
+	delete(updateFields, "updatedAt")
+
 	user := utils.GetUserFromContext(c)
 	if user == nil {
 		return
@@ -90,7 +110,9 @@ func UpdatePost(c *gin.Context) {
 	if pOID == nil {
 		return
 	}
+
 	updateFields["updatedAt"] = time.Now()
+
 	if user.Role == 0 {
 		result, err = models.UpdatePostByOID(*pOID, updateFields)
 	} else {
@@ -184,11 +206,14 @@ func FindAllPostWithCategory(c *gin.Context) {
 		return
 	}
 
-	var sortByLikeCount bool
-	if strings.ToLower(*sort) == "likecount" {
-		sortByLikeCount = true
-	} else {
-		sortByLikeCount = false
+	sortByLikeCount := false
+
+	if sort != nil {
+		if strings.ToLower(*sort) == "likecount" {
+			sortByLikeCount = true
+		} else {
+			sortByLikeCount = false
+		}
 	}
 
 	posts, err := models.FindAllCategoryPostsWithPreview(cOID, *skip, *limit, sortByLikeCount)
@@ -265,16 +290,16 @@ func FindSavedPost(c *gin.Context) {
 
 	// makin the save post to ObjectID
 
-	savedOIDs := []*primitive.ObjectID{}
-	for _, savedId := range user.SavedPosts {
-		oid := utils.GetOID(savedId, c)
-		if oid == nil {
-			return
-		}
+	// savedOIDs := []*primitive.ObjectID{}
+	// for _, savedId := range user.SavedPosts {
+	// 	oid := utils.GetOID(savedId, c)
+	// 	if oid == nil {
+	// 		return
+	// 	}
 
-		savedOIDs = append(savedOIDs, oid)
-	}
-	posts, err := models.FindPostsWithPreview(&[]bson.M{bson.M{"_id": bson.M{"$in": savedOIDs}}}, -1, -1, false)
+	// 	savedOIDs = append(savedOIDs, oid)
+	// }
+	posts, err := models.FindPostsWithPreview(&[]bson.M{bson.M{"_id": bson.M{"$in": user.SavedPosts}}}, -1, -1, false)
 
 	// posts, err := models.FindPosts(bson.M{"_id": bson.M{"$in": savedOIDs}}, findOption)
 
@@ -330,7 +355,7 @@ func LikePost(c *gin.Context) {
 	pid := c.Param("pid")
 	pOID := utils.GetOID(pid, c)
 
-	con := c.Param("condition")
+	con := c.Query("condition")
 
 	var like bool
 

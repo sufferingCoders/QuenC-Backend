@@ -103,22 +103,49 @@ func FindCommentByPost(uOID primitive.ObjectID, findOptions *options.FindOptions
 
 func ToggleLikerForComment(cOID primitive.ObjectID, uOID primitive.ObjectID, like bool) (*mongo.UpdateResult, error) {
 	var pullOrPush string
+	var reverse string
 	if like {
 		pullOrPush = "$push"
+		reverse = "$pull"
 	} else {
 		pullOrPush = "$pull"
+		reverse = "$push"
 	}
+
+	// Adding to Comment
+	_, err := database.UserCollection.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": uOID},
+		bson.M{pullOrPush: bson.M{"likeComments": cOID}},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Adding to User
 
 	result, err := database.CommentCollection.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": cOID},
 		bson.M{pullOrPush: bson.M{"likers": uOID}},
 	)
+	if err != nil {
+		// Reverse the Comment one
+		_, err := database.UserCollection.UpdateOne(
+			context.TODO(),
+			bson.M{"_id": uOID},
+			bson.M{reverse: bson.M{"likeComments": cOID}},
+		)
+
+		return nil, err
+	}
+
 	return result, err
 }
 
-func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int, sortByLikeCount bool) ([]*CommentAdding, error) {
-	var comments []*CommentAdding
+func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int, sortByLikeCount bool) ([]*CommentDetail, error) {
+	var comments []*CommentDetail
 	pipeline := []bson.M{
 		bson.M{"$match": bson.M{
 			"belongPost": pOID,
@@ -153,14 +180,14 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 
 		// Sort by created at
 		bson.M{
-			"$sort": bson.M{"createdAt": -1},
+			"$sort": bson.M{"createdAt": 1},
 		},
 	}
 
 	if sortByLikeCount {
 		pipeline = append(pipeline, bson.M{
 			"$sort": bson.M{
-				"$sort": -1,
+				"likeCount": -1,
 			},
 		})
 	}
@@ -197,8 +224,8 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 
 }
 
-func GetSingleCommentWithDetail(cOID primitive.ObjectID) (*CommentAdding, error) {
-	var comments []*CommentAdding
+func GetSingleCommentWithDetail(cOID primitive.ObjectID) (*CommentDetail, error) {
+	var comments []*CommentDetail
 	pipeline := []bson.M{
 		bson.M{"$match": bson.M{
 			"_id": cOID,

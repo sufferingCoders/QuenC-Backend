@@ -180,30 +180,6 @@ func FindSingleReport(c *gin.Context) {
 
 func FindReportsForPreview(c *gin.Context) {
 
-	// skipStr := c.Query("skip")
-	// limitStr := c.Query("limit")
-	// skip, err := strconv.Atoi(skipStr)
-	// if err != nil {
-	// 	errStr := fmt.Sprintf("Cannot convert the given skip: %+v", err)
-	// 	c.JSON(
-	// 		http.StatusBadRequest, gin.H{
-	// 			"err":     errStr,
-	// 			"skipStr": skipStr,
-	// 		},
-	// 	)
-	// }
-
-	// limit, err := strconv.Atoi(limitStr)
-	// if err != nil {
-	// 	errStr := fmt.Sprintf("Cannot convert the given limit: %+v", err)
-	// 	c.JSON(
-	// 		http.StatusBadRequest, gin.H{
-	// 			"err":      errStr,
-	// 			"limitStr": limitStr,
-	// 		},
-	// 	)
-	// }
-
 	skip, limit, _, err := utils.GetSkipLimitSortFromContext(c)
 
 	if err != nil {

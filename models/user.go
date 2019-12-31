@@ -17,21 +17,23 @@ import (
 
 // User - User Schema
 type User struct {
-	ID            primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Domain        string             `json:"domain" bson:"domain"`
-	Email         string             `json:"email" bson:"email"`
-	Password      string             `json:"password" bson:"password"`
-	PhotoURL      string             `json:"photoURL" bson:"photoURL"`
-	Major         string             `json:"major" bson:"major"`
-	Dob           string             `json:"dob" bson:"dob"`
-	Role          int                `json:"role" bson:"role"`
-	Gender        int                `json:"gender" bson:"gender"`
-	EmailVerified bool               `json:"emailVerified" bson:"emailVerified"`
-	LastSeen      time.Time          `json:"lastSeen" bson:"lastSeen"`
-	CreatedAt     time.Time          `json:"createdAt" bson:"createdAt"`
-	ChatRooms     []string           `json:"chatRooms" bson:"chatRooms"`
-	Friends       []string           `json:"friends" bson:"friends"`
-	SavedPosts    []string           `json:"savedPosts" bson:"savedPosts"`
+	ID            primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
+	Domain        string               `json:"domain" bson:"domain"`
+	Email         string               `json:"email" bson:"email"`
+	Password      string               `json:"password" bson:"password"`
+	PhotoURL      string               `json:"photoURL" bson:"photoURL"`
+	Major         string               `json:"major" bson:"major"`
+	Dob           string               `json:"dob" bson:"dob"`
+	Role          int                  `json:"role" bson:"role"`
+	Gender        int                  `json:"gender" bson:"gender"`
+	EmailVerified bool                 `json:"emailVerified" bson:"emailVerified"`
+	LastSeen      time.Time            `json:"lastSeen" bson:"lastSeen"`
+	CreatedAt     time.Time            `json:"createdAt" bson:"createdAt"`
+	ChatRooms     []primitive.ObjectID `json:"chatRooms" bson:"chatRooms"`
+	LikePosts     []primitive.ObjectID `json:"likePosts" bson:"likePosts"`
+	LikeComments  []primitive.ObjectID `json:"likeComments" bson:"likeComments"`
+	Friends       []primitive.ObjectID `json:"friends" bson:"friends"`
+	SavedPosts    []primitive.ObjectID `json:"savedPosts" bson:"savedPosts"`
 }
 
 var ( // Changing to env variables

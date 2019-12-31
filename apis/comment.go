@@ -167,10 +167,12 @@ func FindCommentsByPost(c *gin.Context) {
 	}
 
 	var sortByLikeCount bool
-	if strings.ToLower(*sort) == "likecount" {
-		sortByLikeCount = true
-	} else {
-		sortByLikeCount = false
+	if sort != nil {
+		if strings.ToLower(*sort) == "likecount" {
+			sortByLikeCount = true
+		} else {
+			sortByLikeCount = false
+		}
 	}
 
 	comments, err := models.FindCommentsWithDetailForPost(*pOID, *skip, *limit, sortByLikeCount)
@@ -179,6 +181,7 @@ func FindCommentsByPost(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -214,7 +217,7 @@ func LikeComment(c *gin.Context) {
 	cid := c.Param("cid")
 	cOID := utils.GetOID(cid, c)
 
-	con := c.Param("condition")
+	con := c.Query("condition")
 
 	var like bool
 
