@@ -20,6 +20,7 @@ var (
 	PostCollection         *mongo.Collection
 	ReportCollection       *mongo.Collection
 	UserCollection         *mongo.Collection
+	ChatRoomCollection     *mongo.Collection
 )
 
 // InitDB - Initialise the database for MongoDB
@@ -49,5 +50,6 @@ func InitDB() {
 	PostCollection = DB.Collection("post")
 	ReportCollection = DB.Collection("report")
 	UserCollection = DB.Collection("user")
+	ChatRoomCollection = DB.Collection("chatRoom")
 
 }

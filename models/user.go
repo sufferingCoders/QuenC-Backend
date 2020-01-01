@@ -185,6 +185,23 @@ func WatchUserByOID(oid primitive.ObjectID) (*mongo.ChangeStream, error) {
 	return stream, err
 }
 
+func WatchChatRooms(chatRooms []primitive.ObjectID) (*mongo.ChangeStream, error) {
+	pipeline := []bson.M{
+		bson.M{
+			"$in": bson.M{"documentKey._id": chatRooms},
+		},
+	}
+
+	// changeStreamOption := options.ChangeStream().SetFullDocument(options.UpdateLookup) // 不用FullDocument, 不然每次會更新整個聊天室, 只有第一次打開時要Loading全部, 用Time來確定
+	collectionStream, err := database.ChatRoomCollection.Watch(context.TODO(), pipeline)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return collectionStream, nil
+}
+
 // Liked Comment, Saved Comment, Saved Posts
 
 func ToggleElementToUserArray(field string, adding bool, element string, uOID primitive.ObjectID) (*mongo.UpdateResult, error) {
