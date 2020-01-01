@@ -195,6 +195,33 @@ func FindReportsForPreview(c *gin.Context) {
 			"limit": limit,
 			"skip":  skip,
 		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"reports": reports,
+	})
+
+}
+
+func FindReportsWithDetail(c *gin.Context) {
+
+	skip, limit, _, err := utils.GetSkipLimitSortFromContext(c)
+
+	if err != nil {
+		return
+	}
+
+	reports, err := models.FindAllReporstWithDetail(*skip, *limit)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot fetch the reports: %+v", reports)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err":   errStr,
+			"limit": limit,
+			"skip":  skip,
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{

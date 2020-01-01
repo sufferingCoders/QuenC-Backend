@@ -43,15 +43,17 @@ type PostPreview struct {
 }
 
 type PostDetail struct {
-	ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Anonymous bool               `json:"anonymous" bson:"anonymous"`
-	Title     string             `json:"title" bson:"title"`
-	Author    User               `json:"author" bson:"author"`
-	Content   string             `json:"content" bson:"content"`
-	Category  PostCategory       `json:"category" bson:"category"`
-	UpdatedAt time.Time          `json:"updatedAt" bson:"updatedAt"`
-	CreatedAt time.Time          `json:"createdAt" bson:"createdAt"`
-	LikeCount int                `json:"likeCount" bson:"likeCount"`
+	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Anonymous    bool               `json:"anonymous" bson:"anonymous"`
+	Title        string             `json:"title" bson:"title"`
+	Author       User               `json:"author" bson:"author"`
+	Content      string             `json:"content" bson:"content"`
+	Category     PostCategory       `json:"category" bson:"category"`
+	UpdatedAt    time.Time          `json:"updatedAt" bson:"updatedAt"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+	LikeCount    int                `json:"likeCount" bson:"likeCount"`
+	PreviewText  string             `json:"previewText" bson:"previewText"`
+	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
 }
 
 // AddPost - Adding Post to MongoDB
@@ -262,8 +264,8 @@ func FindPostsWithPreview(matchingCond *[]bson.M, skip int, limit int, sortByLik
 				"likeCount":    bson.M{"$size": "$likers"},
 				"author":       bson.M{"$arrayElemAt": bson.A{"$author", 0}},
 				"category":     bson.M{"$arrayElemAt": bson.A{"$category", 0}},
-				"previewText":  1,
 				"title":        1,
+				"previewText":  1,
 				"previewPhoto": 1,
 				"createdAt":    1,
 				"anonymous":    1,
@@ -363,15 +365,17 @@ func FindPostWithDetail(matchingCond *[]bson.M) ([]*PostDetail, error) {
 		// Project
 		bson.M{
 			"$project": bson.M{
-				"_id":       1,
-				"likeCount": bson.M{"$size": "$likers"},
-				"author":    bson.M{"$arrayElemAt": bson.A{"$author", 0}},
-				"category":  bson.M{"$arrayElemAt": bson.A{"$category", 0}},
-				"title":     1,
-				"content":   1,
-				"createdAt": 1,
-				"updatedAt": 1,
-				"anonymous": 1,
+				"_id":          1,
+				"likeCount":    bson.M{"$size": "$likers"},
+				"author":       bson.M{"$arrayElemAt": bson.A{"$author", 0}},
+				"category":     bson.M{"$arrayElemAt": bson.A{"$category", 0}},
+				"title":        1,
+				"content":      1,
+				"createdAt":    1,
+				"updatedAt":    1,
+				"anonymous":    1,
+				"previewText":  1,
+				"previewPhoto": 1,
 			},
 		},
 		// Sorting

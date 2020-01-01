@@ -41,6 +41,8 @@ type ReportDetail struct {
 	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	Content      string             `json:"content" bson:"content"`
 	ReportTarget int                `json:"reportTarget" bson:"reportTarget"`
+	PreviewText  string             `json:"previewText" bson:"previewText"`
+	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
 	Solve        bool               `json:"solve" bson:"solve"`
 	Author       User               `json:"author" bson:"author"`
 	ReportID     primitive.ObjectID `json:"reportId" bson:"reportId"`
@@ -114,6 +116,11 @@ func FindAllReporstWithPreview(skip int, limit int) ([]*ReportPreview, error) {
 	return reports, err
 }
 
+func FindAllReporstWithDetail(skip int, limit int) ([]*ReportDetail, error) {
+	reports, err := FindReportsWithDetail(nil, skip, limit)
+	return reports, err
+}
+
 func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*ReportPreview, error) {
 	// This will return the report sort by createdAt
 	var reports []*ReportPreview
@@ -133,7 +140,7 @@ func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*Rep
 				"let":  bson.M{"author": "$author"},
 				"pipeline": bson.A{
 					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
-					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
+					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": 1}},
 				},
 				"as": "author",
 			},
@@ -142,12 +149,87 @@ func FindReportsWithPreview(matchingCond *[]bson.M, skip int, limit int) ([]*Rep
 		bson.M{
 			"$project": bson.M{
 				"reportTarget": 1,
-				"PreviewText":  1,
-				"PreviewPhoto": 1,
-				"author":       1,
+				"previewText":  1,
+				"previewPhoto": 1,
+				"author":       bson.M{"$arrayElemAt": bson.A{"$author", 0}},
 				"solve":        1,
 				"createdAt":    1,
 				"_id":          1,
+			},
+		},
+		// Sort by createdAt
+		// Old one go higher
+		bson.M{
+			"$sort": bson.M{"createdAt": 1},
+		},
+	}...)
+
+	if skip > 0 {
+		pipeline = append(pipeline, bson.M{
+			"$skip": skip,
+		})
+	}
+
+	if limit > 0 {
+		pipeline = append(pipeline, bson.M{
+			"$limit": limit,
+		})
+	}
+
+	result, err := database.ReportCollection.Aggregate(context.TODO(), pipeline)
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = result.All(context.TODO(), &reports)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reports, nil
+}
+
+func FindReportsWithDetail(matchingCond *[]bson.M, skip int, limit int) ([]*ReportDetail, error) {
+	// This will return the report sort by createdAt
+	var reports []*ReportDetail
+
+	var pipeline = []bson.M{}
+
+	if matchingCond != nil {
+		// Find match
+		pipeline = append(pipeline, *matchingCond...)
+	}
+
+	pipeline = append(pipeline, []bson.M{
+		// Populate Author
+		bson.M{
+			"$lookup": bson.M{
+				"from": "user",
+				"let":  bson.M{"author": "$author"},
+				"pipeline": bson.A{
+					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
+					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": 1}},
+				},
+				"as": "author",
+			},
+		},
+
+		bson.M{
+			"$project": bson.M{
+				"reportTarget": 1,
+				"previewText":  1,
+				"previewPhoto": 1,
+				"author":       bson.M{"$arrayElemAt": bson.A{"$author", 0}},
+				"solve":        1,
+				"createdAt":    1,
+				"_id":          1,
+				"content":      1,
+				"reportId":     1,
 			},
 		},
 		// Sort by createdAt
@@ -212,7 +294,7 @@ func FindReportWithDetail(matchingCond *[]bson.M) ([]*ReportDetail, error) {
 				"let":  bson.M{"author": "$author"},
 				"pipeline": bson.A{
 					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
-					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": bson.M{"$cond": bson.M{"if": bson.M{"$eq": bson.A{"$$anonymous", true}}, "then": "", "else": "$domain"}}}},
+					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": 1}},
 				},
 				"as": "author",
 			},
@@ -222,8 +304,10 @@ func FindReportWithDetail(matchingCond *[]bson.M) ([]*ReportDetail, error) {
 		bson.M{
 			"$project": bson.M{
 				"reportTarget": 1,
+				"previewText":  1,
+				"previewPhoto": 1,
 				"content":      1,
-				"author":       1,
+				"author":       bson.M{"$arrayElemAt": bson.A{"$author", 0}},
 				"solve":        1,
 				"createdAt":    1,
 				"reportId":     1,
