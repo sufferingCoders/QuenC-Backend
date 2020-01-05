@@ -64,7 +64,7 @@
 |<ul><li>- [x] </li></ul>| 測試 PostCategory 刪除 |Must Have| 測試PostCategory的刪除功能 | Richard | |
 |<ul><li>- [x] </li></ul>| 測試 Post |Must Have| 測試Post的新增和編輯功能 | Richard | 30 Dec 2019 |
 |<ul><li>- [x] </li></ul>| 測試 Post GET |Must Have| 測試前端Flutter能請求到Post | Richard | 30 Dec 2019 |
-|<ul><li>- [x] </li></ul>| 測試 Post 刪除 |Must Have| 測試Post的刪除功能 | Richard |  |
+|<ul><li>- [x] </li></ul>| 測試 Post 刪除 |Must Have| 測試Post的刪除功能 | Richard | 30 Dec 2019  |
 |<ul><li>- [x] </li></ul>| Post 字數限制 |Must Have| Post的字數限制, 顯示在編輯區 | Richard | 30 Dec 2019  |
 |<ul><li>- [x] </li></ul>| 壓縮上傳的圖片大小 |Must Have| 壓縮Firestore儲存的圖片大小 | Richard | 30 Dec 2019  |
 |<ul><li>- [x] </li></ul>| Post 載入失敗時, 一樣顯示排序 |Must Have| Post 載入失敗時, 一樣顯示排序 | Richard | 30 Dec 2019  |
@@ -76,8 +76,11 @@
 |<ul><li>- [x] </li></ul>| LikeComment & LikePost |Must Have| 喜歡Comment/Post會同時將user加入likers和將Comment/Post加入User的Like清單 | Richard | 1 Jan 2019 |
 |<ul><li>- [x] </li></ul>| 測試熱門&最新的Post&Comment排序 |Must Have| 確認Post&Comment的熱門&最新能正常顯示 | Richard | 1 Jan 2019 |
 |<ul><li>- [x] </li></ul>| 測試Primitive.ObjectID對接時候是可否可以轉成String |Must Have| 若無法則須新增另一Struct (可以轉為S) | Richard | 30 Dec 2019 |
-|<ul><li>- [x] </li></ul>| Refactoring Flutter |Must Have| 為前端加上註釋並Refactor | Richard |  |
-|<ul><li>- [x] </li></ul>| Refactoring Golang |Must Have| 為後端加上註釋並Refactor | Richard | 1 Jan 2019 |
+|<ul><li>- [ ] </li></ul>| Refactoring Flutter |Must Have| 為前端加上註釋並Refactor | Richard |  |
+|<ul><li>- [ ] </li></ul>| Refactoring Golang |Must Have| 為後端加上註釋並Refactor | Richard | |
+|<ul><li>- [ ] </li></ul>| chatRoom Schema + API |Must Have| 完成 ChatRoom (Models+Api+Router)| Richard |  |
+
+
 
 
 
