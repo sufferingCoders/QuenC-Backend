@@ -120,7 +120,7 @@ func DeleteComment(c *gin.Context) {
 	err = models.DeleteCommentByOID(pOID)
 
 	if err != nil {
-		errStr := fmt.Sprintf("Cannot transfrom the given id to ObjectId: %+v", err)
+		errStr := fmt.Sprintf("Cannot delete this comment: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
 			"cid": cid,
@@ -143,9 +143,10 @@ func FindAllComment(c *gin.Context) {
 	comments, err := models.FindComments(bson.M{}, findOption)
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the Comments: %+v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -175,7 +176,13 @@ func FindCommentsByPost(c *gin.Context) {
 		}
 	}
 
-	comments, err := models.FindCommentsWithDetailForPost(*pOID, *skip, *limit, sortByLikeCount)
+	comments, err := models.FindCommentsWithDetailForPost(
+		*pOID,
+		*skip,
+		*limit,
+		sortByLikeCount,
+	)
+
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot retreive the Comment: %+v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{

@@ -155,12 +155,12 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 		bson.M{
 			"$lookup": bson.M{
 				"from": "user",
-				"let":  bson.M{"author": "$author"},
+				"let":  bson.M{"members": "$members"},
 				"pipeline": bson.A{
 					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
 					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": 1}},
 				},
-				"as": "author",
+				"as": "members",
 			},
 		},
 
@@ -275,5 +275,4 @@ func GetSingleCommentWithDetail(cOID primitive.ObjectID) (*CommentDetail, error)
 	}
 
 	return comments[0], nil
-
 }
