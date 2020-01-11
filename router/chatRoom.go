@@ -12,9 +12,8 @@ func InitChatRoomRouter(router *gin.Engine) {
 		chatRoomRouter.POST("/", middlewares.UserAuth(), apis.AddChatRoom)
 		chatRoomRouter.PATCH("/:rid", middlewares.UserAuth(), apis.UpdateChatRoom)
 		chatRoomRouter.DELETE("/:rid", middlewares.UserAuth(), apis.DeleteChatRoom)
-		chatRoomRouter.GET("/rooms", middlewares.UserAuth(), apis.FindUserChatRoomDetailWithoutMessages)
-		
-
+		chatRoomRouter.GET("/rooms", middlewares.UserAuth(), apis.FindUserChatRoomDetailWithLastMessages)
+		chatRoomRouter.GET("/message/:rid", middlewares.UserAuth(), apis.FindMessagesForRoom)
 		chatRoomRouter.GET("/user/subscribe", middlewares.UserAuth(), apis.SubscribeUserChatRoomDetail)
 	}
 }

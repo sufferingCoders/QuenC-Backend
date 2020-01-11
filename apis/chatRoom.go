@@ -127,13 +127,13 @@ func DeleteChatRoom(c *gin.Context) {
 // This need to be watching? get then watching
 
 // then how to get message?
-func FindUserChatRoomDetailWithoutMessages(c *gin.Context) {
+func FindUserChatRoomDetailWithLastMessages(c *gin.Context) {
 	user := utils.GetUserFromContext(c)
 	if user == nil {
 		return
 	}
 
-	chatRooms, err := models.FindChatRoomDetailWithoutMessages(&[]bson.M{
+	chatRooms, err := models.FindChatRoomDetailWithLastMessage(&[]bson.M{
 		bson.M{
 			"$match": bson.M{
 				"$in": bson.A{"$_id", user.ChatRooms},
@@ -160,7 +160,6 @@ func FindUserChatRoomDetailWithoutMessages(c *gin.Context) {
 func FindMessagesForRoom(c *gin.Context) {
 	// you have to be one of the member
 
-	numInt := 50
 	var err error
 
 	user := utils.GetUserFromContext(c)
@@ -174,14 +173,17 @@ func FindMessagesForRoom(c *gin.Context) {
 		return
 	}
 
-	sid := c.Param("sid")
-	sOID := utils.GetOID(sid, c)
-	if sOID == nil {
-		return
+	var sOID *primitive.ObjectID
+	sid := c.Query("sid")
+	if strings.TrimSpace(sid) != "" {
+		sOID = utils.GetOID(sid, c)
+		if sOID == nil {
+			return
+		}
 	}
 
+	numInt := 50
 	num := c.Query("num")
-
 	if strings.TrimSpace(num) != "" {
 		numInt, err = strconv.Atoi(num)
 		if err != nil {
@@ -193,7 +195,7 @@ func FindMessagesForRoom(c *gin.Context) {
 		}
 	}
 
-	messages, err := models.FindMessagesForChatRoomByStartOID(user.ID, *rOID, *sOID, numInt)
+	messages, err := models.FindMessagesForChatRoomByStartOID(user.ID, *rOID, sOID, numInt)
 
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot find the messages: %+v", err)
@@ -206,7 +208,6 @@ func FindMessagesForRoom(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"messages": messages,
 	})
-
 }
 
 // Do the subscribing here

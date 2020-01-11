@@ -249,6 +249,7 @@ func InitRouter() *gin.Engine {
 	InitPostCategoryRouter(router)
 	InitPostRouter(router)
 	InitCommentRouter(router)
+	InitChatRoomRouter(router)
 
 	return router
 }

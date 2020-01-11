@@ -14,22 +14,24 @@ import (
 )
 
 type ChatRoomAdding struct {
-	ID        primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
-	Members   []primitive.ObjectID `json:"members" bson:"members"`
-	Messages  []Message            `json:"messages" bson:"messages"`
-	CreatedAt time.Time            `json:"createdAt" bson:"createdAt"`
-	IsGroup   bool                 `json:"isGroup" bson:"isGroup"`
-	GroupName string               `json:"groupName" bson:"groupName"`
+	ID            primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
+	Members       []primitive.ObjectID `json:"members" bson:"members"`
+	Messages      []Message            `json:"messages" bson:"messages"`
+	CreatedAt     time.Time            `json:"createdAt" bson:"createdAt"`
+	IsGroup       bool                 `json:"isGroup" bson:"isGroup"`
+	GroupName     string               `json:"groupName" bson:"groupName"`
+	GroupPhotoUrl string               `json:"groupPhotoUrl" bson:"groupPhotoUrl"`
 }
 
 // After Populating
 type ChatRoomDetail struct {
-	ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Members   []User             `json:"members" bson:"members"`
-	Messages  []Message          `json:"messages" bson:"messages"`
-	CreatedAt time.Time          `json:"createdAt" bson:"createdAt"`
-	IsGroup   bool               `json:"isGroup" bson:"isGroup"`
-	GroupName string             `json:"groupName" bson:"groupName"`
+	ID            primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Members       []User             `json:"members" bson:"members"`
+	Messages      []Message          `json:"messages" bson:"messages"`
+	CreatedAt     time.Time          `json:"createdAt" bson:"createdAt"`
+	IsGroup       bool               `json:"isGroup" bson:"isGroup"`
+	GroupName     string             `json:"groupName" bson:"groupName"`
+	GroupPhotoUrl string             `json:"groupPhotoUrl" bson:"groupPhotoUrl"`
 }
 
 // GroupChatRoom will generate a ID and the normal chatRoom will use the members' id
@@ -91,7 +93,7 @@ func DeleteChatRoomByOID(oid primitive.ObjectID) error {
 
 // Find the chatroom without messages
 // showing what's in the chatroom to customer
-func FindChatRoomDetailWithoutMessages(matchingCond *[]bson.M, skip int, limit int) ([]*ChatRoomDetail, error) { // will populate members
+func FindChatRoomDetailWithLastMessage(matchingCond *[]bson.M, skip int, limit int) ([]*ChatRoomDetail, error) { // will populate members
 	var chatRooms []*ChatRoomDetail
 
 	var pipeline = []bson.M{}
@@ -102,6 +104,12 @@ func FindChatRoomDetailWithoutMessages(matchingCond *[]bson.M, skip int, limit i
 	}
 
 	pipeline = append(pipeline, []bson.M{
+
+		bson.M{
+			"$sort": bson.M{
+				"messages.createdAt": -1,
+			},
+		},
 
 		// unwind the members
 		bson.M{"$unwind": bson.M{"path": "$members"}},
@@ -122,11 +130,13 @@ func FindChatRoomDetailWithoutMessages(matchingCond *[]bson.M, skip int, limit i
 		// Project
 		bson.M{
 			"$project": bson.M{
-				"_id":       1,
-				"member":    bson.M{"$arrayElemAt": bson.A{"$member", 0}},
-				"isGroup":   1,
-				"createdAt": 1,
-				"groupName": 1,
+				"_id":           1,
+				"messages":      bson.M{"$slice": bson.A{"$messages", -1, 1}}, // get the last messages
+				"member":        bson.M{"$arrayElemAt": bson.A{"$member", 0}},
+				"isGroup":       1,
+				"createdAt":     1,
+				"groupName":     1,
+				"groupPhotoUrl": 1,
 			},
 		},
 
@@ -135,10 +145,12 @@ func FindChatRoomDetailWithoutMessages(matchingCond *[]bson.M, skip int, limit i
 		bson.M{
 			"$group": bson.M{
 				"_id": bson.M{
-					"_id":       "$_id",
-					"createdAt": "$createdAt",
-					"isGroup":   "$isGroup",
-					"groupName": "$groupName",
+					"_id":           "$_id",
+					"createdAt":     "$createdAt",
+					"isGroup":       "$isGroup",
+					"groupName":     "$groupName",
+					"messages":      "$messages",
+					"groupPhotoUrl": "$groupPhotoUrl",
 				},
 				"members": bson.M{"$push": bson.M{
 					"_id":      "$member._id",
@@ -156,11 +168,57 @@ func FindChatRoomDetailWithoutMessages(matchingCond *[]bson.M, skip int, limit i
 
 		bson.M{
 			"$project": bson.M{
-				"_id":       "$_id._id",
-				"createdAt": "$_id.createdAt",
-				"isGroup":   "$_id.isGroup",
-				"groupName": "$_id.groupName",
-				"members":   1,
+				"_id":           "$_id._id",
+				"messages":      "$_id.messages",
+				"createdAt":     "$_id.createdAt",
+				"isGroup":       "$_id.isGroup",
+				"groupName":     "$_id.groupName",
+				"groupPhotoUrl": "$_id.groupPhotoUrl",
+				"members":       1,
+			},
+		},
+
+		// extract the last message here
+
+		bson.M{
+			"$unwind": bson.M{
+				"path": "$messages",
+			},
+		},
+
+		bson.M{
+			"$lookup": bson.M{
+				"from": "user",
+				"let":  bson.M{"messages": "$messages"},
+				"pipeline": bson.A{
+					bson.M{"match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$messages.author"}}}},
+					bson.M{"_id": 1., "gender": 1, "domain": 1, " major": 1, "photoURL": 1, "role": 1, "email": 1},
+				},
+				"as": "messages.author",
+			},
+		},
+
+		bson.M{"$group": bson.M{
+			"_id": bson.M{
+				"_id":           "$_id",
+				"createdAt":     "$createdAt",
+				"isGroup":       "$isGroup",
+				"groupName":     "$groupName",
+				"members":       "$members",
+				"groupPhotoUrl": "$groupPhotoUrl",
+			},
+			"messages": bson.M{"$push": bson.M{"_id": "$messages._id", "author": bson.M{"$arrayElemAt": bson.A{"$messages.author", 0}}, "likeBy": "$messages.likeBy", "readBy": "$messages.readBy", "messageType": "$messages.messageType", "content": "$messages.content", "createdAt": "$messages.createdAt"}},
+		}},
+
+		bson.M{
+			"$project": bson.M{
+				"_id":           "$_id._id",
+				"members":       "$_id.members",
+				"createdAt":     "$_id.createdAt",
+				"isGroup":       "$_id.isGroup",
+				"groupName":     "$_id.groupName",
+				"groupPhotoUrl": "$_id.groupPhotoUrl",
+				"messages":      1,
 			},
 		},
 	}...,
@@ -260,7 +318,7 @@ func FindMessagesForChatRoomByTime(chatRoomOID primitive.ObjectID, startTime tim
 
 // find the chatroom with the last 50 messages
 
-func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID primitive.ObjectID, StartOID primitive.ObjectID, retreiveNum int) (*[]Message, error) {
+func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID primitive.ObjectID, StartOID *primitive.ObjectID, retreiveNum int) (*[]Message, error) {
 
 	var chatRooms []*ChatRoomDetail
 
@@ -287,27 +345,37 @@ func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID p
 				"messages.createdAt": -1,
 			},
 		},
+	}
 
-		bson.M{
-			"$project": bson.M{
-				"messages": 1,
-				"midx":     bson.M{"$indexOfArray": bson.A{"$messages._id", StartOID}},
-				"_id":      1,
+	if StartOID != nil {
+		pipeline = append(pipeline, []bson.M{
+			bson.M{
+				"$project": bson.M{
+					"messages": 1,
+					"midx":     bson.M{"$indexOfArray": bson.A{"$messages._id", StartOID}},
+					"_id":      1,
+				},
 			},
-		},
 
-		bson.M{
-			"$project": bson.M{
-				"messages": bson.M{"$slice": bson.A{"$messages", bson.M{"$substact": bson.A{"$midx", retreiveNum}}, retreiveNum}},
-				"_id":      1,
+			bson.M{
+				"$project": bson.M{
+					"messages": bson.M{"$slice": bson.A{"$messages", bson.M{"$substact": bson.A{"$midx", retreiveNum}}, retreiveNum}},
+					"_id":      1,
+				},
 			},
-		},
+		}...)
+	} else {
+		pipeline = append(pipeline, []bson.M{
+			bson.M{
+				"$project": bson.M{
+					"messages": bson.M{"$slice": bson.A{"$messages", -1 * retreiveNum, retreiveNum}},
+					"_id":      1,
+				},
+			},
+		}...)
+	}
 
-		// We should populate the author here
-		// Get the author detail
-
-		// First
-
+	pipeline = append(pipeline, []bson.M{
 		bson.M{
 			"$unwind": bson.M{
 				"path": "$messages",
@@ -349,7 +417,7 @@ func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID p
 				"messages": 1,
 			},
 		},
-	}
+	}...)
 
 	result, err := database.ChatRoomCollection.Aggregate(context.TODO(), pipeline)
 	if result != nil {
