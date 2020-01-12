@@ -453,3 +453,19 @@ func WatchChatRooms(chatRooms []primitive.ObjectID) (*mongo.ChangeStream, error)
 
 	return collectionStream, nil
 }
+
+/*
+	Message
+*/
+
+func AddMessageToChatRoom(rOID primitive.ObjectID, inputMessage Message) (interface{}, error) {
+	result, err := database.ChatRoomCollection.UpdateOne(context.TODO(), bson.M{"_id": rOID}, bson.M{
+		"$push": inputMessage,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

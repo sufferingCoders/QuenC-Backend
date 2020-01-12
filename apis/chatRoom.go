@@ -9,6 +9,7 @@ import (
 	"quenc/utils"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -46,7 +47,54 @@ func AddChatRoom(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"chatRoom": chatRoom,
 	})
+}
 
+func AddMessageToChatRoom(c *gin.Context) {
+	var message models.Message
+	var err error
+
+	// getting the chat roomOID
+
+	rid := c.Param("rid")
+	rOID := utils.GetOID(rid, c)
+	if rOID == nil {
+		return
+	}
+
+	if err = c.ShouldBind(&message); err != nil {
+		errStr := fmt.Sprintf("Cannot bind the input json: %+v", err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
+	user := utils.GetUserFromContext(c)
+	if user == nil {
+		return
+	}
+
+	message.Author = user.ID
+	message.CreatedAt = time.Now()
+	message.LikedBy = []primitive.ObjectID{}
+	message.ReadBy = []primitive.ObjectID{} // author doens't need to be here
+	message.ID = primitive.NewObjectID()
+
+	result, err := models.AddMessageToChatRoom(*rOID, message)
+
+	if err != nil {
+		errStr := fmt.Sprintf("Cannot add this message : %+v", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"err": errStr,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"result":  result,
+		"id":      message.ID,
+		"message": message,
+	})
 }
 
 func UpdateChatRoom(c *gin.Context) {

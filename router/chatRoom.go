@@ -10,6 +10,7 @@ func InitChatRoomRouter(router *gin.Engine) {
 	chatRoomRouter := router.Group("/chat-room")
 	{
 		chatRoomRouter.POST("/", middlewares.UserAuth(), apis.AddChatRoom)
+		chatRoomRouter.POST("/message/:rid", middlewares.UserAuth(), apis.AddMessageToChatRoom)
 		chatRoomRouter.PATCH("/:rid", middlewares.UserAuth(), apis.UpdateChatRoom)
 		chatRoomRouter.DELETE("/:rid", middlewares.UserAuth(), apis.DeleteChatRoom)
 		chatRoomRouter.GET("/rooms", middlewares.UserAuth(), apis.FindUserChatRoomDetailWithLastMessages)

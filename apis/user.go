@@ -91,6 +91,7 @@ func SingupUser(c *gin.Context) {
 	user := models.User{
 		Domain:        userDomain,
 		Email:         singupInfo.Email,
+		Name:          "",
 		Password:      string(hashedPassword),
 		PhotoURL:      "",
 		Major:         "",
@@ -289,11 +290,11 @@ func LoginUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	var UpdateFields map[string]interface{}
-	err := c.ShouldBindJSON(&UpdateFields)
+	var updateFields map[string]interface{}
+	err := c.ShouldBindJSON(&updateFields)
 
-	if _, ok := UpdateFields["dob"]; ok {
-		_, err := time.Parse("2006-01-02 15:04:05.000Z", UpdateFields["dob"].(string))
+	if _, ok := updateFields["dob"]; ok {
+		_, err := time.Parse("2006-01-02 15:04:05.000Z", updateFields["dob"].(string))
 		if err != nil {
 			errStr := fmt.Sprint("The given DOB is not valid time %+v", err)
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -303,6 +304,16 @@ func UpdateUser(c *gin.Context) {
 			return
 		}
 	}
+
+	delete(updateFields, "_id")
+	delete(updateFields, "email")
+	delete(updateFields, "createdAt")
+	delete(updateFields, "emailVerified")
+	delete(updateFields, "chatRooms")
+	delete(updateFields, "likePosts")
+	delete(updateFields, "likeComments")
+	delete(updateFields, "friends")
+	delete(updateFields, "savedPosts")
 
 	if err != nil {
 		errStr := fmt.Sprintf("Cannot bind the given data with UpdateUserInfo: %+v", err)
@@ -314,7 +325,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if UpdateFields["password"] != nil {
+	if updateFields["password"] != nil {
 
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"err": "Using change-password node to change password",
@@ -330,7 +341,7 @@ func UpdateUser(c *gin.Context) {
 	}
 	// Admin should be able to do
 
-	UpsertedID, err := models.UpdateUserByOID(user.ID, UpdateFields)
+	UpsertedID, err := models.UpdateUserByOID(user.ID, updateFields)
 
 	fmt.Printf("error is %+v\n", err)
 
@@ -343,7 +354,7 @@ func UpdateUser(c *gin.Context) {
 				"err":            errStr,
 				"msg":            "Cannot update this user",
 				"user":           user,
-				"UpdateUserInfo": UpdateFields,
+				"UpdateUserInfo": updateFields,
 			},
 		)
 		return
@@ -353,7 +364,7 @@ func UpdateUser(c *gin.Context) {
 		http.StatusOK,
 		gin.H{
 			"UpsertedID":     UpsertedID,
-			"UpdateUserInfo": UpdateFields,
+			"UpdateUserInfo": updateFields,
 		},
 	)
 

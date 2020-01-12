@@ -12,11 +12,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
+
 )
 
 // User - User Schema
 type User struct {
 	ID            primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
+	Name          string               `json:"name" bson:"name"`
 	Domain        string               `json:"domain" bson:"domain"`
 	Email         string               `json:"email" bson:"email"`
 	Password      string               `json:"password" bson:"password"`
