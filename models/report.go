@@ -17,15 +17,16 @@ import (
 // ReportID
 
 type ReportAdding struct {
-	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Content      string             `json:"content" bson:"content"`
-	PreviewText  string             `json:"previewText" bson:"previewText"`
-	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
-	ReportTarget int                `json:"reportTarget" bson:"reportTarget"`
-	Solve        bool               `json:"solve" bson:"solve"`
-	Author       primitive.ObjectID `json:"author" bson:"author"`
-	ReportID     primitive.ObjectID `json:"reportId" bson:"reportId"`
-	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+	ID           primitive.ObjectID     `json:"_id" bson:"_id,omitempty"`
+	Content      string                 `json:"content" bson:"content"`
+	PreviewText  string                 `json:"previewText" bson:"previewText"`
+	PreviewPhoto string                 `json:"previewPhoto" bson:"previewPhoto"`
+	ReportTarget int                    `json:"reportTarget" bson:"reportTarget"`
+	Solve        bool                   `json:"solve" bson:"solve"`
+	Author       primitive.ObjectID     `json:"author" bson:"author"`
+	ReportID     primitive.ObjectID     `json:"reportId" bson:"reportId"`
+	CreatedAt    time.Time              `json:"createdAt" bson:"createdAt"`
+	ReportObject map[string]interface{} `json:"c" bson:"reportObject"`
 }
 
 type ReportPreview struct {
@@ -38,15 +39,16 @@ type ReportPreview struct {
 	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
 }
 type ReportDetail struct {
-	ID           primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Content      string             `json:"content" bson:"content"`
-	ReportTarget int                `json:"reportTarget" bson:"reportTarget"`
-	PreviewText  string             `json:"previewText" bson:"previewText"`
-	PreviewPhoto string             `json:"previewPhoto" bson:"previewPhoto"`
-	Solve        bool               `json:"solve" bson:"solve"`
-	Author       User               `json:"author" bson:"author"`
-	ReportID     primitive.ObjectID `json:"reportId" bson:"reportId"`
-	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
+	ID           primitive.ObjectID     `json:"_id" bson:"_id,omitempty"`
+	Content      string                 `json:"content" bson:"content"`
+	ReportTarget int                    `json:"reportTarget" bson:"reportTarget"`
+	PreviewText  string                 `json:"previewText" bson:"previewText"`
+	PreviewPhoto string                 `json:"previewPhoto" bson:"previewPhoto"`
+	Solve        bool                   `json:"solve" bson:"solve"`
+	Author       User                   `json:"author" bson:"author"`
+	ReportID     primitive.ObjectID     `json:"reportId" bson:"reportId"`
+	CreatedAt    time.Time              `json:"createdAt" bson:"createdAt"`
+	ReportObject map[string]interface{} `json:"reportObject" bson:"reportObject"`
 }
 
 func AddReport(inputReport *ReportAdding) (interface{}, error) {
@@ -221,6 +223,7 @@ func FindReportsWithDetail(matchingCond *[]bson.M, skip int, limit int) ([]*Repo
 
 		bson.M{
 			"$project": bson.M{
+				"reportObject": 1,
 				"reportTarget": 1,
 				"previewText":  1,
 				"previewPhoto": 1,
@@ -303,6 +306,7 @@ func FindReportWithDetail(matchingCond *[]bson.M) ([]*ReportDetail, error) {
 		// Old one go higher
 		bson.M{
 			"$project": bson.M{
+				"reportObject": 1,
 				"reportTarget": 1,
 				"previewText":  1,
 				"previewPhoto": 1,

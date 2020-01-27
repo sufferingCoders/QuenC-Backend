@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -216,4 +217,23 @@ func CheckDomainValid(domain string) bool {
 		}
 	}
 	return false
+}
+
+func StructToMap(inputStruct interface{}) (map[string]interface{}, error) {
+
+	inputJSON, err := json.Marshal(inputStruct)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var inputMap map[string]interface{}
+
+	err = json.Unmarshal(inputJSON, &inputMap)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return inputMap, nil
 }

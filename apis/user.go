@@ -374,6 +374,10 @@ func ToggleFunc(field string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		condition := c.Param("codition")
 		id := c.Param("id")
+		OID := utils.GetOID(id, c)
+		if OID != nil {
+			return
+		}
 
 		var adding bool
 
@@ -394,7 +398,7 @@ func ToggleFunc(field string) gin.HandlerFunc {
 			return
 		}
 
-		result, err := models.ToggleElementToUserArray(field, adding, id, user.ID)
+		result, err := models.ToggleElementToUserArray(field, adding, *OID, user.ID)
 
 		if err != nil {
 			errStr := fmt.Sprintf("Cannot toggle the condition: %+v", err)

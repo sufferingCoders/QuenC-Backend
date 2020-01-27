@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"quenc/database"
 	"time"
@@ -10,17 +11,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 )
 
 type ChatRoomAdding struct {
 	ID            primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
-	Members       []primitive.ObjectID `json:"members" bson:"members"`
+	Members       []primitive.ObjectID `json:"members" bson:"members"` // ignore this field first, and consider the length of the result
 	Messages      []Message            `json:"messages" bson:"messages"`
 	CreatedAt     time.Time            `json:"createdAt" bson:"createdAt"`
 	IsGroup       bool                 `json:"isGroup" bson:"isGroup"`
 	GroupName     string               `json:"groupName" bson:"groupName"`
 	GroupPhotoUrl string               `json:"groupPhotoUrl" bson:"groupPhotoUrl"`
+	Midx          int                  `json:"midx" bson:"midx"`
 }
 
 // After Populating
@@ -91,6 +94,17 @@ func DeleteChatRoomByOID(oid primitive.ObjectID) error {
 	return err
 }
 
+func FindChatRoomByOID(oid primitive.ObjectID) (*ChatRoomAdding, error) {
+	var room ChatRoomAdding
+	err := database.ChatRoomCollection.FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&room)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &room, nil
+}
+
 // Find the chatroom without messages
 // showing what's in the chatroom to customer
 func FindChatRoomDetailWithLastMessage(matchingCond *[]bson.M, skip int, limit int) ([]*ChatRoomDetail, error) { // will populate members
@@ -111,10 +125,10 @@ func FindChatRoomDetailWithLastMessage(matchingCond *[]bson.M, skip int, limit i
 			},
 		},
 
-		// unwind the members
+		// 	// unwind the members
 		bson.M{"$unwind": bson.M{"path": "$members"}},
 
-		// get the member detail
+		// 	// get the member detail
 		bson.M{
 			"$lookup": bson.M{
 				"from": "user",
@@ -127,11 +141,11 @@ func FindChatRoomDetailWithLastMessage(matchingCond *[]bson.M, skip int, limit i
 			},
 		},
 
-		// Project
+		// 	// Project
 		bson.M{
 			"$project": bson.M{
 				"_id":           1,
-				"messages":      bson.M{"$slice": bson.A{"$messages", -1, 1}}, // get the last messages
+				"messages":      bson.M{"$slice": bson.A{"$messages", -20}}, // get the last messages
 				"member":        bson.M{"$arrayElemAt": bson.A{"$member", 0}},
 				"isGroup":       1,
 				"createdAt":     1,
@@ -140,7 +154,7 @@ func FindChatRoomDetailWithLastMessage(matchingCond *[]bson.M, skip int, limit i
 			},
 		},
 
-		// Group
+		// 	// Group
 
 		bson.M{
 			"$group": bson.M{
@@ -164,7 +178,7 @@ func FindChatRoomDetailWithLastMessage(matchingCond *[]bson.M, skip int, limit i
 			},
 		},
 
-		// Project
+		// 	// Project
 
 		bson.M{
 			"$project": bson.M{
@@ -178,49 +192,59 @@ func FindChatRoomDetailWithLastMessage(matchingCond *[]bson.M, skip int, limit i
 			},
 		},
 
-		// extract the last message here
+		// 	// extract the last message and populate the author here
 
-		bson.M{
-			"$unwind": bson.M{
-				"path": "$messages",
-			},
-		},
+		// success point till here
 
-		bson.M{
-			"$lookup": bson.M{
-				"from": "user",
-				"let":  bson.M{"messages": "$messages"},
-				"pipeline": bson.A{
-					bson.M{"match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$messages.author"}}}},
-					bson.M{"_id": 1., "gender": 1, "domain": 1, " major": 1, "photoURL": 1, "role": 1, "email": 1},
-				},
-				"as": "messages.author",
-			},
-		},
+		// 1. 先確認全部運行是否可行 /// no
+		// 2. 確認代碼
+		// 3. 在atlas上populate messages看看
 
-		bson.M{"$group": bson.M{
-			"_id": bson.M{
-				"_id":           "$_id",
-				"createdAt":     "$createdAt",
-				"isGroup":       "$isGroup",
-				"groupName":     "$groupName",
-				"members":       "$members",
-				"groupPhotoUrl": "$groupPhotoUrl",
-			},
-			"messages": bson.M{"$push": bson.M{"_id": "$messages._id", "author": bson.M{"$arrayElemAt": bson.A{"$messages.author", 0}}, "likeBy": "$messages.likeBy", "readBy": "$messages.readBy", "messageType": "$messages.messageType", "content": "$messages.content", "createdAt": "$messages.createdAt"}},
-		}},
+		// bson.M{
+		// 	"$unwind": bson.M{
+		// 		"path": "$messages",
+		// 	},
+		// },
 
-		bson.M{
-			"$project": bson.M{
-				"_id":           "$_id._id",
-				"members":       "$_id.members",
-				"createdAt":     "$_id.createdAt",
-				"isGroup":       "$_id.isGroup",
-				"groupName":     "$_id.groupName",
-				"groupPhotoUrl": "$_id.groupPhotoUrl",
-				"messages":      1,
-			},
-		},
+		// bson.M{
+		// 	"$lookup": bson.M{
+		// 		"from": "user",
+		// 		"let":  bson.M{"messages": "$messages"},
+		// 		"pipeline": bson.A{
+		// 			bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$messages.author"}}}},
+		// 			bson.M{"$project": bson.M{"_id": 1., "gender": 1, "domain": 1, " major": 1, "photoURL": 1, "role": 1, "email": 1}},
+		// 		},
+		// 		"as": "messages.author",
+		// 	},
+		// },
+
+		// bson.M{"$group": bson.M{
+		// 	"_id": bson.M{
+		// 		"_id":           "$_id",
+		// 		"createdAt":     "$createdAt",
+		// 		"isGroup":       "$isGroup",
+		// 		"groupName":     "$groupName",
+		// 		"members":       "$members",
+		// 		"groupPhotoUrl": "$groupPhotoUrl",
+		// 	},
+		// 	"messages": bson.M{
+		// 		"$push": bson.M{
+		// 			"_id":    "$messages._id",
+		// 			"author": bson.M{"$arrayElemAt": bson.A{"$messages.author", 0}}, "likeBy": "$messages.likeBy", "readBy": "$messages.readBy", "messageType": "$messages.messageType", "content": "$messages.content", "createdAt": "$messages.createdAt"}},
+		// },
+		// },
+
+		// bson.M{
+		// 	"$project": bson.M{
+		// 		"_id":           "$_id._id",
+		// 		"members":       "$_id.members",
+		// 		"createdAt":     "$_id.createdAt",
+		// 		"isGroup":       "$_id.isGroup",
+		// 		"groupName":     "$_id.groupName",
+		// 		"groupPhotoUrl": "$_id.groupPhotoUrl",
+		// 		"messages":      1,
+		// 	},
+		// },
 	}...,
 	)
 
@@ -320,7 +344,7 @@ func FindMessagesForChatRoomByTime(chatRoomOID primitive.ObjectID, startTime tim
 
 func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID primitive.ObjectID, StartOID *primitive.ObjectID, retreiveNum int) (*[]Message, error) {
 
-	var chatRooms []*ChatRoomDetail
+	var chatRooms []*ChatRoomAdding
 
 	pipeline := []bson.M{
 		bson.M{
@@ -330,13 +354,13 @@ func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID p
 						"_id": chatRoomOID,
 					},
 					bson.M{
-						"member": bson.M{"$in": bson.A{
-							userOID,
-						}},
+						"members": bson.M{"$elemMatch": bson.M{"$eq": userOID}},
 					},
 				},
 			},
 		},
+
+		//sid 5e29a6866825930a64512f6b
 
 		// do populate the author here
 
@@ -346,6 +370,8 @@ func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID p
 			},
 		},
 	}
+
+	// sOID, _ := primitive.ObjectIDFromHex("5e294cc9c98f076c24d8ab85")
 
 	if StartOID != nil {
 		pipeline = append(pipeline, []bson.M{
@@ -359,8 +385,31 @@ func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID p
 
 			bson.M{
 				"$project": bson.M{
-					"messages": bson.M{"$slice": bson.A{"$messages", bson.M{"$substact": bson.A{"$midx", retreiveNum}}, retreiveNum}},
-					"_id":      1,
+					"messages": bson.M{
+						"$slice": bson.A{
+							"$messages",
+							bson.M{
+								"$cond": bson.M{
+									"if": bson.M{
+										"$gt": bson.A{
+											bson.M{
+												"$subtract": bson.A{"$midx", retreiveNum},
+											},
+											0,
+										},
+									},
+
+									"then": bson.M{
+										"$subtract": bson.A{"$midx", retreiveNum},
+									},
+									"else": 0,
+								},
+							},
+							retreiveNum,
+						},
+					},
+					"_id":  1,
+					"midx": 1,
 				},
 			},
 		}...)
@@ -376,45 +425,47 @@ func FindMessagesForChatRoomByStartOID(userOID primitive.ObjectID, chatRoomOID p
 	}
 
 	pipeline = append(pipeline, []bson.M{
-		bson.M{
-			"$unwind": bson.M{
-				"path": "$messages",
-			},
-		},
-
 		// bson.M{
-		// 	"from":         "user",
-		// 	"localField":   "messages.author",
-		// 	"foreignField": "_id",
-		// 	"as":           "messages.author",
+		// 	"$unwind": bson.M{
+		// 		"path": "$messages",
+		// 	},
 		// },
 
-		// Second
+		// // bson.M{
+		// // 	"from":         "user",
+		// // 	"localField":   "messages.author",
+		// // 	"foreignField": "_id",
+		// // 	"as":           "messages.author",
+		// // },
 
-		// Look up for message authors
-		bson.M{
-			"$lookup": bson.M{
-				"from": "user",
-				"let":  bson.M{"messages": "$messages"},
-				"pipeline": bson.A{
-					bson.M{"match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$messages.author"}}}},
-					bson.M{"_id": 1., "gender": 1, "domain": 1, " major": 1, "photoURL": 1, "role": 1, "email": 1},
-				},
-				"as": "messages.author",
-			},
-		},
+		// // Second
 
-		// Group the message back
+		// // Look up for message authors
+		// bson.M{
+		// 	"$lookup": bson.M{
+		// 		"from": "user",
+		// 		"let":  bson.M{"messages": "$messages"},
+		// 		"pipeline": bson.A{
+		// 			bson.M{"match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$messages.author"}}}},
+		// 			bson.M{"_id": 1., "gender": 1, "domain": 1, " major": 1, "photoURL": 1, "role": 1, "email": 1},
+		// 		},
+		// 		"as": "messages.author",
+		// 	},
+		// },
 
-		bson.M{"$group": bson.M{
-			"_id":      bson.M{"_id": "$_id"},
-			"messages": bson.M{"$push": bson.M{"_id": "$messages._id", "author": bson.M{"$arrayElemAt": bson.A{"$messages.author", 0}}, "likeBy": "$messages.likeBy", "readBy": "$messages.readBy", "messageType": "$messages.messageType", "content": "$messages.content", "createdAt": "$messages.createdAt"}},
-		}},
+		// // Group the message back
+
+		// bson.M{"$group": bson.M{
+		// 	"_id":      bson.M{"_id": "$_id"},
+		// 	"messages": bson.M{"$push": bson.M{"_id": "$messages._id", "author": bson.M{"$arrayElemAt": bson.A{"$messages.author", 0}}, "likeBy": "$messages.likeBy", "readBy": "$messages.readBy", "messageType": "$messages.messageType", "content": "$messages.content", "createdAt": "$messages.createdAt"}},
+		// }},
 
 		bson.M{
 			"$project": bson.M{
-				"_id":      "$_id._id",
+				// "_id":      "$_id._id",
+				"_id":      1,
 				"messages": 1,
+				"midx":     1,
 			},
 		},
 	}...)
@@ -460,7 +511,7 @@ func WatchChatRooms(chatRooms []primitive.ObjectID) (*mongo.ChangeStream, error)
 
 func AddMessageToChatRoom(rOID primitive.ObjectID, inputMessage Message) (interface{}, error) {
 	result, err := database.ChatRoomCollection.UpdateOne(context.TODO(), bson.M{"_id": rOID}, bson.M{
-		"$push": inputMessage,
+		"$push": bson.M{"messages": inputMessage},
 	})
 
 	if err != nil {
@@ -468,4 +519,143 @@ func AddMessageToChatRoom(rOID primitive.ObjectID, inputMessage Message) (interf
 	}
 
 	return result, nil
+}
+
+func FindUsersWithoutRandomChat(uOID primitive.ObjectID) (*User, error) {
+
+	var users []*User
+
+	pipeline := []bson.M{
+		bson.M{
+			"$match": bson.M{
+				"$and": bson.A{
+					bson.M{
+						"randomChatRoom": nil,
+					},
+					bson.M{
+						"$expr": bson.M{"$ne": bson.A{
+							"$_id", uOID,
+						}},
+					},
+					bson.M{
+						"emailVerified": true,
+					},
+				},
+			},
+		},
+
+		bson.M{"$sort": bson.M{
+			"lastSeen": -1,
+		}},
+
+		bson.M{"$limit": 1},
+	}
+
+	result, err := database.UserCollection.Aggregate(context.TODO(), pipeline)
+
+	if result != nil {
+		defer result.Close(context.TODO())
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = result.All(context.TODO(), &users)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) < 1 {
+		return nil, errors.New("Cannot find any user to create a random chat with")
+	}
+
+	return users[0], nil
+}
+
+func CreateChatRoomForTwoUser(aOID primitive.ObjectID, bOID primitive.ObjectID) (*primitive.ObjectID, error) {
+
+	// 1. create chat room
+
+	result, err := database.ChatRoomCollection.InsertOne(context.TODO(), ChatRoomAdding{
+		Members:   []primitive.ObjectID{aOID, bOID},
+		CreatedAt: time.Now(),
+		Messages:  []Message{},
+		IsGroup:   false,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	chatRoomID := result.InsertedID.(primitive.ObjectID)
+
+	// 2. addin the chatroom id to both user
+
+	upResult, err := database.UserCollection.UpdateMany(context.TODO(), bson.M{"_id": bson.M{"$in": bson.A{aOID, bOID}}}, bson.M{"$set": bson.M{"randomChatRoom": chatRoomID}})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if upResult.ModifiedCount != 2 {
+		return nil, errors.New(fmt.Sprintf("modified count is not 2 but :%+v", upResult.ModifiedCount))
+	}
+
+	return &chatRoomID, err
+}
+
+// Remove chatroom 段開連接8
+
+func WatchRandomChatRoom(pipeline []bson.M, changeStreamOption *options.ChangeStreamOptions) (*mongo.ChangeStream, error) {
+	collectionStream, err := database.ChatRoomCollection.Watch(context.TODO(), pipeline, changeStreamOption)
+	return collectionStream, err
+}
+
+func WatchRandomChatRoomByOID(oid primitive.ObjectID) (*mongo.ChangeStream, error) {
+
+	pipeline := []bson.M{
+		bson.M{
+			"$match": bson.M{"documentKey._id": oid},
+		},
+	}
+
+	collectionStream, err := WatchRandomChatRoom(pipeline, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return collectionStream, nil
+
+}
+
+func RemoveMemberFromChatRoom(rOID primitive.ObjectID, uOID primitive.ObjectID) (*mongo.UpdateResult, error) {
+
+	result, err := database.ChatRoomCollection.UpdateOne(context.TODO(), bson.M{"_id": rOID}, bson.M{"$pull": bson.M{"members": uOID}})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// aslo do the same thing for user
+
+	_, err = database.UserCollection.UpdateMany(context.TODO(), bson.M{"_id": uOID}, bson.M{"$set": bson.M{"randomChatRoom": nil}})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
+}
+
+func DeleteChatRoomWithNoneMembers(rOID primitive.ObjectID) (*mongo.DeleteResult, error) {
+	result, err := database.ChatRoomCollection.DeleteOne(context.TODO(), bson.M{"$and": bson.A{bson.M{"_id": rOID}, bson.M{"members": bson.M{"$size": 0}}}})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
 }

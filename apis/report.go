@@ -33,6 +33,80 @@ func AddReport(c *gin.Context) {
 		return
 	}
 
+	switch report.ReportTarget {
+	case 0:
+		// find post
+		post, err := models.FindSinglePostWithDetail(report.ReportID)
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot find this Report post: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+			})
+			return
+		}
+
+		retreivedMap, err := utils.StructToMap(post)
+
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot convert this post to map: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+			})
+			return
+		}
+
+		report.ReportObject = retreivedMap
+
+	case 1:
+		// find comment
+		comment, err := models.FindCommentByOID(report.ReportID)
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot find this Report comment: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+			})
+			return
+		}
+
+		retreivedMap, err := utils.StructToMap(comment)
+
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot convert this comment to map: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+			})
+			return
+		}
+
+		report.ReportObject = retreivedMap
+
+		break
+	case 2:
+		// find chat
+		room, err := models.FindChatRoomByOID(report.ReportID)
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot find this Report chat room: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+			})
+			return
+		}
+
+		retreivedMap, err := utils.StructToMap(room)
+
+		if err != nil {
+			errStr := fmt.Sprintf("Cannot convert this room to map: %+v", err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"err": errStr,
+			})
+			return
+		}
+
+		report.ReportObject = retreivedMap
+
+		break
+	}
+
 	report.Author = user.ID
 	report.CreatedAt = time.Now()
 	report.Solve = false
