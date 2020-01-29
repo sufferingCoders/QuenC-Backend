@@ -8,10 +8,20 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 // DB - MongoDB database
-var DB *mongo.Database
+
+var (
+	DB                     *mongo.Database
+	PostCategoryCollection *mongo.Collection
+	CommentCollection      *mongo.Collection
+	PostCollection         *mongo.Collection
+	ReportCollection       *mongo.Collection
+	UserCollection         *mongo.Collection
+	ChatRoomCollection     *mongo.Collection
+)
 
 // InitDB - Initialise the database for MongoDB
 func InitDB() {
@@ -34,4 +44,12 @@ func InitDB() {
 	fmt.Println("Connected to MongoDB successfully.")
 
 	DB = client.Database("quenc")
+
+	PostCategoryCollection = DB.Collection("postCategory")
+	CommentCollection = DB.Collection("comment")
+	PostCollection = DB.Collection("post")
+	ReportCollection = DB.Collection("report")
+	UserCollection = DB.Collection("user")
+	ChatRoomCollection = DB.Collection("chatRoom")
+
 }

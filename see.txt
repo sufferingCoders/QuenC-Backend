@@ -1,0 +1,18 @@
+lookup
+
+{
+  from: 'user',
+  let: {belongUser_item:"$belongUser" },
+  pipeline: [
+  {$match: {$expr: {$eq : ["$_id" ,"$$belongUser_item"]}}}, 
+  { $project: { _id: 1, name: 1 } }
+  ],
+  as: 'belongUserObj',
+}
+
+
+project
+{
+  name:1,
+  belongUser: {$arrayElemAt: ["$belongUser", 0]}
+}

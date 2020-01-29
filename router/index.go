@@ -1,4 +1,4 @@
-package routers
+package router
 
 import (
 	"context"
@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 var upGrader = websocket.Upgrader{
@@ -35,6 +36,7 @@ type TestInfo struct {
 // InitRouter -initialise all the routers
 func InitRouter() *gin.Engine {
 	router := gin.Default()
+	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(200, []string{"123", "321"})
@@ -164,20 +166,41 @@ func InitRouter() *gin.Engine {
 
 		defer collectionStream.Close(context.TODO())
 
+		// ws.WriteMessage(websocket.TextMessage, []byte("hello"))
+
 		for {
 			ok := collectionStream.Next(context.TODO())
 			if ok {
 				next := collectionStream.Current
 
-				log.Printf("Next: %+v", next)
+				var m map[string]interface{}
 
-				err = ws.WriteMessage(websocket.TextMessage, []byte(next.String()))
-
+				err := bson.Unmarshal(next, &m)
 				if err != nil {
+					log.Print(err)
 					break
 				}
+
+				// fmt.Printf("map: %+v", m["fullDocument"])
+
+				// if m["fullDocument"].(map[string]interface{})["email"] == "123" {
+				// 	ws.WriteMessage(websocket.TextMessage, []byte("You gave me 123"))
+				// 	fmt.Printf("Send out 123")
+
+				// }
+
+				err = ws.WriteJSON(m["fullDocument"].(map[string]interface{}))
+				if err != nil {
+					log.Print(err)
+					break
+				}
+
 			}
+
 		}
+
+		fmt.Println("Send out the message_3")
+
 	})
 
 	// This for changing the filed in the MongoDB
@@ -220,6 +243,13 @@ func InitRouter() *gin.Engine {
 			}
 		}
 	})
+
+	InitUserRouter(router)
+	InitReportRouter(router)
+	InitPostCategoryRouter(router)
+	InitPostRouter(router)
+	InitCommentRouter(router)
+	InitChatRoomRouter(router)
 
 	return router
 }

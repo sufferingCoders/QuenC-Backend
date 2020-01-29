@@ -1,0 +1,4 @@
+runtime: go1.13
+env: flex
+network:
+  session_affinity: true
