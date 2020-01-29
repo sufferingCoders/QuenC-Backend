@@ -14,7 +14,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 type SingupInfo struct {
@@ -370,12 +369,13 @@ func UpdateUser(c *gin.Context) {
 
 }
 
+/// the one only about user
 func ToggleFunc(field string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		condition := c.Param("codition")
+		condition := c.Param("condition")
 		id := c.Param("id")
 		OID := utils.GetOID(id, c)
-		if OID != nil {
+		if OID == nil {
 			return
 		}
 
@@ -387,7 +387,7 @@ func ToggleFunc(field string) gin.HandlerFunc {
 			adding = false
 		} else {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"err": "You didn't give a compatible condition",
+				"err": "need a compatible condition",
 			})
 			return
 		}
@@ -414,7 +414,6 @@ func ToggleFunc(field string) gin.HandlerFunc {
 			},
 		)
 	}
-
 }
 
 func SubscribeUser(c *gin.Context) {

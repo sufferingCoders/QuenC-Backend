@@ -16,7 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-
 )
 
 // Need a login Auth
@@ -431,7 +430,7 @@ func AssignRandomChatRoomForUser(c *gin.Context) {
 	_, err = models.AddMessageToChatRoom(*roomID, models.Message{
 		Author:      user.ID,
 		MessageType: 0, // 0 for admin usage
-		Content:     "對方已離開聊天室...",
+		Content:     "已連線...",
 		CreatedAt:   time.Now(),
 		LikedBy:     []primitive.ObjectID{},
 		ReadBy:      []primitive.ObjectID{},

@@ -6,12 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
-
 )
 
 func main() {
-	database.InitDB()
 
+	database.InitDB()
 	gin.ForceConsoleColor()
 	r := router.InitRouter()
 	r.Run()

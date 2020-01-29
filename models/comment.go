@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
 )
 
 type CommentAdding struct {
@@ -155,12 +154,12 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 		bson.M{
 			"$lookup": bson.M{
 				"from": "user",
-				"let":  bson.M{"members": "$members"},
+				"let":  bson.M{"author": "$author"},
 				"pipeline": bson.A{
 					bson.M{"$match": bson.M{"$expr": bson.M{"$eq": bson.A{"$_id", "$$author"}}}},
 					bson.M{"$project": bson.M{"_id": 1, "gender": 1, "domain": 1}},
 				},
-				"as": "members",
+				"as": "author",
 			},
 		},
 
@@ -172,9 +171,10 @@ func FindCommentsWithDetailForPost(pOID primitive.ObjectID, skip int, limit int,
 				"belongPost": 1,
 				"likeCount":  bson.M{"$size": "$likers"},
 				"author":     bson.M{"$arrayElemAt": bson.A{"$author", 0}},
-				"content":    1,
-				"createdAt":  1,
-				"updatedAt":  1,
+				// "author":    1,
+				"content":   1,
+				"createdAt": 1,
+				"updatedAt": 1,
 			},
 		},
 

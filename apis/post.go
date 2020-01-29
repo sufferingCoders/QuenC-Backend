@@ -15,7 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
 )
 
 func AddPost(c *gin.Context) {
@@ -299,7 +298,8 @@ func FindSavedPost(c *gin.Context) {
 
 	// 	savedOIDs = append(savedOIDs, oid)
 	// }
-	posts, err := models.FindPostsWithPreview(&[]bson.M{bson.M{"_id": bson.M{"$in": user.SavedPosts}}}, -1, -1, false)
+
+	posts, err := models.FindPostsWithPreview(&[]bson.M{bson.M{"$match": bson.M{"_id": bson.M{"$in": user.SavedPosts}}}}, -1, -1, false)
 
 	// posts, err := models.FindPosts(bson.M{"_id": bson.M{"$in": savedOIDs}}, findOption)
 
@@ -308,6 +308,7 @@ func FindSavedPost(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"err": errStr,
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
