@@ -68,17 +68,17 @@
 |<ul><li>- [x] </li></ul>| Post 字數限制 |Must Have| Post的字數限制, 顯示在編輯區 | Richard | 30 Dec 2019  |
 |<ul><li>- [x] </li></ul>| 壓縮上傳的圖片大小 |Must Have| 壓縮Firestore儲存的圖片大小 | Richard | 30 Dec 2019  |
 |<ul><li>- [x] </li></ul>| Post 載入失敗時, 一樣顯示排序 |Must Have| Post 載入失敗時, 一樣顯示排序 | Richard | 30 Dec 2019  |
-|<ul><li>- [x] </li></ul>| 測試 Comment 新增 |Must Have| 測試Comment的新增功能 | Richard | 1 Jan 2019 |
-|<ul><li>- [x] </li></ul>| 測試 Comment 刪除 |Must Have| 測試Comment的刪除功能 | Richard | 1 Jan 2019 |
-|<ul><li>- [x] </li></ul>| 測試 Report 新增 |Must Have| 測試Report的新增功能 | Richard | 1 Jan 2019 |
-|<ul><li>- [x] </li></ul>| 測試 Report 編輯 |Must Have| 測試Report可以被標記為Solved | Richard | 1 Jan 2019 |
-|<ul><li>- [x] </li></ul>| 前端API路徑修正 |Must Have| 連接上新的Backend | Richard | 1 Jan 2019 |
-|<ul><li>- [x] </li></ul>| LikeComment & LikePost |Must Have| 喜歡Comment/Post會同時將user加入likers和將Comment/Post加入User的Like清單 | Richard | 1 Jan 2019 |
-|<ul><li>- [x] </li></ul>| 測試熱門&最新的Post&Comment排序 |Must Have| 確認Post&Comment的熱門&最新能正常顯示 | Richard | 1 Jan 2019 |
-|<ul><li>- [x] </li></ul>| 測試Primitive.ObjectID對接時候是可否可以轉成String |Must Have| 若無法則須新增另一Struct (可以轉為S) | Richard | 30 Dec 2019 |
-|<ul><li>- [ ] </li></ul>| Refactoring Flutter |Must Have| 為前端加上註釋並Refactor | Richard |  |
-|<ul><li>- [ ] </li></ul>| Refactoring Golang |Must Have| 為後端加上註釋並Refactor | Richard | |
-|<ul><li>- [ ] </li></ul>| chatRoom Schema + API |Must Have| 完成 ChatRoom (Models+Api+Router)| Richard |  |
+|<ul><li>- [x] </li></ul>| 測試 Comment 新增 |Must Have| 測試Comment的新增功能 | Richard | 1 Jan 2020 |
+|<ul><li>- [x] </li></ul>| 測試 Comment 刪除 |Must Have| 測試Comment的刪除功能 | Richard | 1 Jan 2020 |
+|<ul><li>- [x] </li></ul>| 測試 Report 新增 |Must Have| 測試Report的新增功能 | Richard | 1 Jan 2020 |
+|<ul><li>- [x] </li></ul>| 測試 Report 編輯 |Must Have| 測試Report可以被標記為Solved | Richard | 1 Jan 2020 |
+|<ul><li>- [x] </li></ul>| 前端API路徑修正 |Must Have| 連接上新的Backend | Richard | 1 Jan 2020 |
+|<ul><li>- [x] </li></ul>| LikeComment & LikePost |Must Have| 喜歡Comment/Post會同時將user加入likers和將Comment/Post加入User的Like清單 | Richard | 1 Jan 2020 |
+|<ul><li>- [x] </li></ul>| 測試熱門&最新的Post&Comment排序 |Must Have| 確認Post&Comment的熱門&最新能正常顯示 | Richard | 1 Jan 2020 |
+|<ul><li>- [x] </li></ul>| 測試Primitive.ObjectID對接時候是可否可以轉成String |Must Have| 若無法則須新增另一Struct (可以轉為S) | Richard | 30 Dec 2020 |
+|<ul><li>- [x] </li></ul>| Refactoring Flutter |Must Have| 為前端加上註釋並Refactor | Richard | 30 Jan 2020 |
+|<ul><li>- [x] </li></ul>| Refactoring Golang |Must Have| 為後端加上註釋並Refactor | Richard | 30 Jan 2020|
+|<ul><li>- [x] </li></ul>| chatRoom Schema + API |Must Have| 完成 ChatRoom (Models+Api+Router)| Richard | 30 Jan 2020 |
 
 
 
@@ -528,4 +528,6 @@ router.GET("/test/subscribe/:id", func(c *gin.Context) {
 這是因為我們已經將 Get Request 升級為 Websocket, 不能再使用c.JSON去傳送HTTP訊息
 
 
+## 使用Go1.13版本, 依賴管理室使用Modules, 然後在實作中有使用到Gorilla的WebSocket.當部屬到App Engine時, 在Standard Enviroment中沒辦法調適 `session_affinity: true` (讓WebSocket順利運行) 而在Flixble Enviroment中則無法使用Modules這個依賴處理的方法, 
+解決辦法是使用1.11的舊辦法, 用先用 `go env -w GO111MODULE=off` 後 用 `go get` 去取得所有包裹, 而有些包裹因為已經遷移至Modules的方法(路徑改變後會有Invalid的路徑), 當有invalid路徑的時候直接去Github上下載, 然後再將下載下來的Package放進指定的路徑中
 
