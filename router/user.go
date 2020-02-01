@@ -20,6 +20,8 @@ func InitUserRouter(router *gin.Engine) {
 		userRouter.PATCH("/like-posts/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likePosts"))
 		userRouter.PATCH("/like-comments/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("likeComments"))
 		userRouter.PATCH("/saved-posts/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("savedPosts"))
+		userRouter.PATCH("/block-post/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("blockedPosts"))
+		userRouter.PATCH("/block-user/:id/:condition", middlewares.UserAuth(), apis.ToggleFunc("blockedUsers"))
 		userRouter.GET("/subsrible", middlewares.UserAuth(), apis.SubscribeUser)
 	}
 }

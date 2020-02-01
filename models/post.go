@@ -9,7 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
 )
 
 // PostAdding -PostAdding Schema
@@ -278,11 +277,16 @@ func FindPostsWithPreview(matchingCond *[]bson.M, skip int, limit int, sortByLik
 	}...)
 
 	if sortByLikeCount {
-		pipeline = append(pipeline, bson.M{
-			"$sort": bson.M{
-				"likeCount": -1,
-			},
-		})
+		pipeline = append(pipeline, []bson.M{
+			bson.M{"$match": bson.M{
+				"$expr": bson.M{"$gt": bson.A{"$createdAt", time.Now().AddDate(0, 0, -7)}},
+			}},
+			bson.M{
+				"$sort": bson.M{
+					"likeCount": -1,
+				},
+			}}...)
+
 	}
 
 	if skip > 0 {

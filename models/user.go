@@ -12,7 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 // User - User Schema
@@ -31,6 +30,8 @@ type User struct {
 	EmailVerified  bool                 `json:"emailVerified" bson:"emailVerified"`
 	LastSeen       time.Time            `json:"lastSeen" bson:"lastSeen"`
 	CreatedAt      time.Time            `json:"createdAt" bson:"createdAt"`
+	BlockedPosts   []primitive.ObjectID `json:"blockedPosts" bson:"blockedPosts"`
+	BlockedUsers   []primitive.ObjectID `json:"blockedUsers" bson:"blockedUsers"`
 	ChatRooms      []primitive.ObjectID `json:"chatRooms" bson:"chatRooms"`
 	LikePosts      []primitive.ObjectID `json:"likePosts" bson:"likePosts"`
 	LikeComments   []primitive.ObjectID `json:"likeComments" bson:"likeComments"`
@@ -44,7 +45,7 @@ var ( // Changing to env variables
 	projectionForRemovingPassword = bson.D{
 		{"password", 0},
 	}
-	verificationBaseURL = "http://192.168.1.135:8080/user/email/activate/"
+	verificationBaseURL = "http://quenc-hlc.appspot.com/user/email/activate/"
 )
 
 func (u *User) IsAmin() bool {
